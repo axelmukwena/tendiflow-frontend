@@ -19,8 +19,6 @@ export const Providers: FC<ProvidersProps> = async ({ children }) => {
     token,
   });
 
-  console.log({ user, token });
-
   return (
     <Fragment>
       <Toaster />

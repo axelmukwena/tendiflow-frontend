@@ -215,10 +215,7 @@ export async function exportMeetingToExcel(
 
     // Write and download the file
     XLSX.writeFile(workbook, filename);
-
-    console.log(`Successfully exported meeting data to ${filename}`);
-  } catch (error) {
-    console.error("Error exporting meeting to Excel:", error);
+  } catch {
     throw new Error(
       "Failed to export meeting data to Excel. Please try again.",
     );
