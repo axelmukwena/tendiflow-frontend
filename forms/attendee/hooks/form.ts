@@ -2,8 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { Attendee } from "@/api/services/weaver/attendees/types";
-import { getFormErrorMessages } from "@/forms/general";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
+import { getFormErrorMessages } from "@/forms/general";
 
 import { attendeeFormDefaultValues } from "../defaults";
 import { ATTENDEE_FORM_SCHEMA, AttendeeFormSchema } from "../schema";

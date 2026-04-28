@@ -2,8 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { Meeting } from "@/api/services/weaver/meetings/types";
-import { getFormErrorMessages } from "@/forms/general";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
+import { getFormErrorMessages } from "@/forms/general";
 
 import { meetingFormDefaultValues } from "../defaults";
 import { MEETING_FORM_SCHEMA, MeetingFormSchema } from "../schema";

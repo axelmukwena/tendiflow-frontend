@@ -8,9 +8,9 @@ import { EntityDialog } from "@/components/dialogs/entity";
 import { LinearLoader } from "@/components/loaders/linear";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useAttendeeUserStatistics } from "@/hooks/profile/attendee/statistics";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
 import { useCurrentUserContext } from "@/contexts/current-user";
+import { useAttendeeUserStatistics } from "@/hooks/profile/attendee/statistics";
 import { getTimeBasedGreeting } from "@/utilities/helpers/date";
 import { OrganisationForm } from "@/views/organisations/one/form";
 
