@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 
 import { CustomFieldType, MeetingRelationship } from "../meetings/types";
-import { OauthClient } from "../oauth/types";
 import { OrganisationRelationship } from "../organisations/types";
 import {
   BasicApiResponse,
@@ -156,16 +155,12 @@ export interface AttendeeCreateGuestClient
     AttendeeCheckinCreate,
     AttendeeFeedbackCreateInternal {}
 
-export interface AttendeeCreateGuest
-  extends OauthClient,
-    AttendeeCreateGuestClient {}
+export type AttendeeCreateGuest = AttendeeCreateGuestClient;
 
 export interface AttendeeUpdate extends AttendeeBase {}
 
 export interface AttendeeUpdateGuestClient extends AttendeeBase {}
-export interface AttendeeUpdateGuest
-  extends OauthClient,
-    AttendeeUpdateGuestClient {}
+export type AttendeeUpdateGuest = AttendeeUpdateGuestClient;
 
 export interface AttendeeCancel {
   status: AttendanceStatus;
@@ -178,9 +173,7 @@ export interface AttendeeDatabaseStatusUpdate {
 export interface AttendeeFeedbackCreateClient
   extends AttendeeFeedbackCreateInternal {}
 
-export interface AttendeeFeedbackCreate
-  extends OauthClient,
-    AttendeeFeedbackCreateClient {}
+export type AttendeeFeedbackCreate = AttendeeFeedbackCreateClient;
 
 // Query interfaces
 export interface AttendeeQuery {
@@ -264,28 +257,20 @@ export interface GetGuestAttendeeClientProps {
   device_fingerprint: string;
 }
 
-export interface GetGuestAttendeeProps extends GetGuestAttendeeClientProps {
-  params: OauthClient;
-}
+export type GetGuestAttendeeProps = GetGuestAttendeeClientProps;
 
 export interface UpdateGuestAttendeeClientProps {
   organisation_id: string;
   device_fingerprint: string;
   data: AttendeeUpdateGuestClient;
 }
-export interface UpdateGuestAttendeeProps
-  extends UpdateGuestAttendeeClientProps {
-  params: OauthClient;
-}
+export type UpdateGuestAttendeeProps = UpdateGuestAttendeeClientProps;
 
 export interface CancelGuestAttendanceClientProps {
   organisation_id: string;
   device_fingerprint: string;
 }
-export interface CancelGuestAttendanceProps
-  extends CancelGuestAttendanceClientProps {
-  params: OauthClient;
-}
+export type CancelGuestAttendanceProps = CancelGuestAttendanceClientProps;
 
 export interface UpdateAttendeeProps {
   organisation_id: string;

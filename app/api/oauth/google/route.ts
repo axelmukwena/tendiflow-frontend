@@ -9,7 +9,6 @@ import {
   getHeadersNextRequest,
   getSeureNextRequestCookie,
 } from "@/api/utilities";
-import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
 import { verifyCsrfToken } from "@/utilities/helpers/csrf";
 import { CookieKey } from "@/utilities/helpers/enums";
 import { getErrorMessage } from "@/utilities/helpers/errors";
@@ -27,25 +26,8 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
   }
 
   try {
-    const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET } = ENVIRONMENT_VARIABLES;
-    if (!OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Google Authentication Error! OAuth credentials are not set!",
-        },
-        { status: 500 },
-      );
-    }
-
-    const inputBody = await req.json();
+    const googleLoginData: GoogleLoginRequest = await req.json();
     const headers = getHeadersNextRequest(req);
-    const googleLoginData: GoogleLoginRequest = {
-      ...inputBody,
-      client_id: OAUTH_CLIENT_ID,
-      client_secret: OAUTH_CLIENT_SECRET,
-    } satisfies GoogleLoginRequest;
     const oauthService = new OauthService(headers);
     const tokenResponse = await oauthService.google({
       data: googleLoginData,

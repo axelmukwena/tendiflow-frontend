@@ -41,11 +41,6 @@ export interface OauthToken {
   token_type: OauthTokenType;
 }
 
-export interface OauthClient {
-  client_id: string;
-  client_secret: string;
-}
-
 // Request interfaces
 export interface SignupRequestClient {
   email: string;
@@ -59,27 +54,23 @@ export interface SignupRequestClient {
   occupation?: string | null;
   language?: Language | null;
 }
-export interface SignupRequest extends OauthClient, SignupRequestClient {}
+export type SignupRequest = SignupRequestClient;
 
 export interface LoginRequestClient {
   email: string;
   password: string;
 }
-export interface LoginRequest extends OauthClient, LoginRequestClient {}
+export type LoginRequest = LoginRequestClient;
 
 export interface RefreshTokenRequestClient {
   refresh_token: string;
 }
-export interface RefreshTokenRequest
-  extends OauthClient,
-    RefreshTokenRequestClient {}
+export type RefreshTokenRequest = RefreshTokenRequestClient;
 
 export interface GoogleLoginRequestClient {
   access_token: string;
 }
-export interface GoogleLoginRequest
-  extends OauthClient,
-    GoogleLoginRequestClient {}
+export type GoogleLoginRequest = GoogleLoginRequestClient;
 
 // API Response types
 export type SignupResponseApi = User | ErrorApiResponse;

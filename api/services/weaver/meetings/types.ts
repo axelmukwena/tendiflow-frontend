@@ -1,4 +1,3 @@
-import { OauthClient } from "../oauth/types";
 import { OrganisationRelationship } from "../organisations/types";
 import { WeaverMimeType } from "../types/file";
 import {
@@ -325,7 +324,6 @@ export interface CheckMeetingLocationProps {
 export interface GetPublicMeetingProps {
   organisation_id: string;
   meeting_id: string;
-  params: OauthClient;
 }
 
 // Hook interfaces

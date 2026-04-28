@@ -23,7 +23,6 @@ export class MeetingNoTokenService extends WeaverNoTokenApiService {
   async get({
     organisation_id,
     meeting_id,
-    params,
   }: GetPublicMeetingProps): Promise<DataServiceResponse<Meeting | null>> {
     try {
       const res = await this.api.get<GetPublicMeetingResponseApi>(
@@ -32,7 +31,6 @@ export class MeetingNoTokenService extends WeaverNoTokenApiService {
           meeting_id,
           action: ApiActionMeeting.PUBLIC,
         }),
-        { params },
       );
 
       if (

@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { AttendeeNoTokenService } from "@/api/services/weaver/attendees/notoken.service";
-import {
-  AttendeeCreateGuest,
-  AttendeeCreateGuestClient,
-} from "@/api/services/weaver/attendees/types";
+import { AttendeeCreateGuest } from "@/api/services/weaver/attendees/types";
 import { getHeadersNextRequest } from "@/api/utilities";
-import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
 import { verifyCsrfToken } from "@/utilities/helpers/csrf";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
@@ -31,20 +27,9 @@ export const POST = async (
   }
 
   try {
-    const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET } = ENVIRONMENT_VARIABLES;
-    if (!OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Authentication Error! OAuth credentials are not set!",
-        },
-        { status: 500 },
-      );
-    }
-
     const params = await context.params;
     const { organisationId } = params;
-    const requestBody: AttendeeCreateGuestClient = await req.json();
+    const guestCheckinData: AttendeeCreateGuest = await req.json();
 
     if (!organisationId) {
       return NextResponse.json(
@@ -52,12 +37,6 @@ export const POST = async (
         { status: 400 },
       );
     }
-
-    const guestCheckinData: AttendeeCreateGuest = {
-      ...requestBody,
-      client_id: OAUTH_CLIENT_ID,
-      client_secret: OAUTH_CLIENT_SECRET,
-    } satisfies AttendeeCreateGuest;
 
     const headers = getHeadersNextRequest(req);
     const attendeeService = new AttendeeNoTokenService(headers);

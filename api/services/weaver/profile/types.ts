@@ -1,5 +1,4 @@
 import { MembershipPermission } from "../memberships/types";
-import { OauthClient } from "../oauth/types";
 import { ErrorApiResponse, Language } from "../types/general";
 import { User } from "../users/types";
 
@@ -43,25 +42,19 @@ export interface PasswordChangeUpdate {
 export interface PasswordResetRequestClient {
   email: string;
 }
-export interface PasswordResetRequest
-  extends OauthClient,
-    PasswordResetRequestClient {}
+export type PasswordResetRequest = PasswordResetRequestClient;
 
 export interface PasswordResetConfirmClient {
   email: string;
   code: string;
   new_password: string;
 }
-export interface PasswordResetConfirm
-  extends OauthClient,
-    PasswordResetConfirmClient {}
+export type PasswordResetConfirm = PasswordResetConfirmClient;
 
 export interface EmailVerificationRequestClient {
   email: string;
 }
-export interface EmailVerificationRequest
-  extends OauthClient,
-    EmailVerificationRequestClient {}
+export type EmailVerificationRequest = EmailVerificationRequestClient;
 
 export interface EmailVerificationConfirm {
   code: string;

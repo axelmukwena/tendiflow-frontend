@@ -101,6 +101,7 @@ export const useEmailVerificationConfirmForm =
 
     const handleResendCode = async (): Promise<void> => {
       setIsResending(true);
+      resetForm();
 
       if (!currentUser) {
         notify({

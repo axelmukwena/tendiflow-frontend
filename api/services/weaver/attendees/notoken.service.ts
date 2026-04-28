@@ -74,7 +74,6 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
   async getGuestByFingerprint({
     organisation_id,
     device_fingerprint,
-    params,
   }: GetGuestAttendeeProps): Promise<DataServiceResponse<Attendee | null>> {
     try {
       const res = await this.api.get<GetGuestAttendeeResponseApi>(
@@ -83,7 +82,6 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
           device_fingerprint,
           action: ApiActionAttendee.GET_GUEST_BY_FINGERPRINT,
         }),
-        { params },
       );
 
       if (
@@ -120,7 +118,6 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
     organisation_id,
     device_fingerprint,
     data,
-    params,
   }: UpdateGuestAttendeeProps): Promise<DataServiceResponse<Attendee | null>> {
     try {
       const res = await this.api.put<UpdateGuestAttendeeResponseApi>(
@@ -130,7 +127,6 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
           action: ApiActionAttendee.UPDATE_GUEST_BY_FINGERPRINT,
         }),
         data,
-        { params },
       );
 
       if (
@@ -166,7 +162,6 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
   async cancelGuestByFingerprint({
     organisation_id,
     device_fingerprint,
-    params,
   }: CancelGuestAttendanceProps): Promise<
     DataServiceResponse<Attendee | null>
   > {
@@ -178,7 +173,6 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
           action: ApiActionAttendee.CANCEL_GUEST_BY_FINGERPRINT,
         }),
         {},
-        { params },
       );
 
       if (

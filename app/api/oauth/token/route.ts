@@ -9,7 +9,6 @@ import {
   getHeadersNextRequest,
   getSeureNextRequestCookie,
 } from "@/api/utilities";
-import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
 import { verifyCsrfToken } from "@/utilities/helpers/csrf";
 import { CookieKey, HeaderKey } from "@/utilities/helpers/enums";
 import { getErrorMessage } from "@/utilities/helpers/errors";
@@ -24,17 +23,6 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
   }
 
   try {
-    const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET } = ENVIRONMENT_VARIABLES;
-    if (!OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Authentication Error! OAuth credentials are not set!",
-        },
-        { status: 401 },
-      );
-    }
-
     const cooks = await cookies();
     const refreshToken =
       cooks.get(CookieKey.TENDIFLOW_REFRESH_TOKEN)?.value ||
@@ -51,10 +39,8 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
 
     const headers = getHeadersNextRequest(req);
     const tokenData: RefreshTokenRequest = {
-      client_id: OAUTH_CLIENT_ID,
-      client_secret: OAUTH_CLIENT_SECRET,
       refresh_token: refreshToken,
-    } satisfies RefreshTokenRequest;
+    };
     const oauthService = new OauthService(headers);
     const tokenResponse = await oauthService.token({ data: tokenData });
     const { data, message, statuscode } = tokenResponse;

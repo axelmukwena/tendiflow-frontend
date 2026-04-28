@@ -10,8 +10,8 @@ export const LogoutView: FC = () => {
   const { logout } = useUserCredentialsContext();
 
   const handleLogout = async (): Promise<void> => {
-    await logout();
-    window.location.pathname = ClientPathname.LOGIN;
+    // await logout();
+    // window.location.pathname = ClientPathname.LOGIN;
   };
 
   useEffect(() => {

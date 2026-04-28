@@ -17,6 +17,7 @@ export enum HeaderKey {
   X_FORWARDED_HOST = "x-forwarded-host",
   X_FORWARDED_PORT = "x-forwarded-port",
   X_FORWARDED_PROTO = "x-forwarded-proto",
+  X_API_KEY = "x-api-key",
 }
 
 export enum StorageHeader {
