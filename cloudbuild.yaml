@@ -20,16 +20,6 @@ steps:
   - push
   - ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_APP_ENV}:latest
 
-- id: artifact-cleanup-policy
-  name: asia-docker.pkg.dev/gcr-cleaner/gcr-cleaner/gcr-cleaner-cli:latest
-  args:
-  - -repo
-  - ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_APP_ENV}
-  - -keep
-  - "3"
-  - -tag-filter-any
-  - ".*"
-
 - id: deploy-cloud-run
   name: gcr.io/cloud-builders/gcloud
   args:
