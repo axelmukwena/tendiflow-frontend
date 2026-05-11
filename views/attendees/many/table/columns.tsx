@@ -78,7 +78,7 @@ export const AttendeeColumns = (
     width: 250,
     renderCell: ({ row }): ReactNode => (
       <WeaverLink
-        href={`/meetings/${row.meeting_id}/attendees/${row.id}`}
+        href={`/meetings/${row.meeting_id}?tab=attendee&attendeeId=${row.id}`}
         className="font-medium text-sm text-gray-900 hover:text-blue-600 transition-colors"
       >
         {row.first_name} {row.last_name}

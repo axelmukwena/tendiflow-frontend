@@ -1,10 +1,10 @@
 "use client";
 
 import { Group, Users } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { FC, Fragment, useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { FC, Fragment } from "react";
 
-import { DynamicTabs, TabItem } from "@/components/ui/dynamic-tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMeetingById } from "@/hooks/meetings/id";
 import { AttendeesContentView } from "@/views/attendees/many/content";
 import { AttendeeView } from "@/views/attendees/one";
@@ -13,98 +13,50 @@ import { NotFound } from "@/views/not-found";
 import { MeetingHeader } from "./header";
 import { MeetingPageContent } from "./view";
 
+export const DEFAULT_MEETING_TAB = "meeting";
+
+type MeetingTab = "meeting" | "attendees" | "attendee";
+
 interface MeetingViewProps {
   meetingId: string;
-  attendeeId?: string | null;
 }
 
-export const MeetingView: FC<MeetingViewProps> = ({
-  meetingId,
-  attendeeId,
-}) => {
+export const MeetingView: FC<MeetingViewProps> = ({ meetingId }) => {
   const {
     meeting,
     isLoading,
     mutateMeeting: handleMutateMeeting,
   } = useMeetingById({ meetingId });
+
+  const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const { tabs, children } = useMemo(() => {
-    if (!meeting) return { tabs: [], children: null };
+  const tabParam = (searchParams.get("tab") as MeetingTab | null) ?? null;
+  const attendeeId = searchParams.get("attendeeId");
+  // "attendee" tab is only valid when an attendeeId is present in the query.
+  const activeTab: MeetingTab =
+    tabParam === "attendee" && attendeeId
+      ? "attendee"
+      : tabParam === "attendees"
+        ? "attendees"
+        : DEFAULT_MEETING_TAB;
 
-    const meetingPathname = `/meetings/${meeting.id}`;
-    const attendeesPathname = `/meetings/${meeting.id}/attendees`;
-    const attendeePathname = `/meetings/${meeting.id}/attendees/${attendeeId}`;
-
-    const meetingTabs: TabItem[] = [
-      {
-        id: "meeting",
-        name: "Meeting",
-        path: meetingPathname,
-        icon: Group,
-      },
-      {
-        id: "attendees",
-        name: "Attendees",
-        path: attendeesPathname,
-        icon: Users,
-      },
-      ...(attendeeId
-        ? [
-            {
-              id: "attendee",
-              name: "Attendee",
-              path: attendeePathname,
-              icon: Users,
-            },
-          ]
-        : []),
-    ];
-
-    // Determine content based on pathname
-    let content: React.ReactNode = null;
-
-    switch (pathname) {
-      case meetingPathname:
-        content = (
-          <MeetingPageContent
-            meeting={meeting}
-            handleMutateMeetings={handleMutateMeeting}
-          />
-        );
-        break;
-
-      case attendeesPathname:
-        content = (
-          <AttendeesContentView
-            meetingId={meetingId}
-            handleMutateParent={handleMutateMeeting}
-          />
-        );
-        break;
-
-      case attendeePathname:
-        content = attendeeId ? (
-          <AttendeeView
-            attendeeId={attendeeId}
-            meetingId={meeting.id}
-            handleMutateParent={handleMutateMeeting}
-          />
-        ) : null;
-        break;
-
-      default:
-        content = (
-          <MeetingPageContent
-            meeting={meeting}
-            handleMutateMeetings={handleMutateMeeting}
-          />
-        );
-        break;
+  const handleTabChange = (value: string): void => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === DEFAULT_MEETING_TAB) {
+      params.delete("tab");
+    } else {
+      params.set("tab", value);
     }
-
-    return { tabs: meetingTabs, children: content };
-  }, [meeting, pathname, meetingId, attendeeId, handleMutateMeeting]);
+    // Switching away from the attendee tab drops the attendeeId so we don't
+    // leak it back into the URL the next time someone toggles.
+    if (value !== "attendee") {
+      params.delete("attendeeId");
+    }
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
 
   if (isLoading) {
     return (
@@ -126,17 +78,61 @@ export const MeetingView: FC<MeetingViewProps> = ({
     return <NotFound name="Meeting" />;
   }
 
-  const pathnames = {
-    meeting: `/meetings/${meeting.id}`,
-    attendees: `/meetings/${meeting.id}/attendees`,
-    attendee: `/meetings/${meeting.id}/attendees/${attendeeId}`,
-  };
-
   return (
     <Fragment>
-      <MeetingHeader meeting={meeting} pathnames={pathnames} />
+      <MeetingHeader meeting={meeting} />
       <div className="flex flex-col gap-6">
-        <DynamicTabs tabs={tabs}>{children}</DynamicTabs>
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full gap-4 md:gap-6"
+        >
+          <TabsList
+            className="grid"
+            style={{
+              gridTemplateColumns: `repeat(${attendeeId ? 3 : 2}, minmax(0, 1fr))`,
+            }}
+          >
+            <TabsTrigger value="meeting" className="flex items-center gap-1">
+              <Group className="h-4 w-4" />
+              <span>Meeting</span>
+            </TabsTrigger>
+            <TabsTrigger value="attendees" className="flex items-center gap-1">
+              <Users className="h-4 w-4" />
+              <span>Attendees</span>
+            </TabsTrigger>
+            {attendeeId && (
+              <TabsTrigger value="attendee" className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                <span>Attendee</span>
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="meeting">
+            <MeetingPageContent
+              meeting={meeting}
+              handleMutateMeetings={handleMutateMeeting}
+            />
+          </TabsContent>
+
+          <TabsContent value="attendees">
+            <AttendeesContentView
+              meetingId={meetingId}
+              handleMutateParent={handleMutateMeeting}
+            />
+          </TabsContent>
+
+          {attendeeId && (
+            <TabsContent value="attendee">
+              <AttendeeView
+                attendeeId={attendeeId}
+                meetingId={meeting.id}
+                handleMutateParent={handleMutateMeeting}
+              />
+            </TabsContent>
+          )}
+        </Tabs>
       </div>
     </Fragment>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 
 import { Meeting } from "@/api/services/weaver/meetings/types";
@@ -15,45 +15,20 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-interface MeetingHeaderPathnames {
-  meeting: string;
-  attendees: string;
-  attendee: string;
-}
-
-const getParentPath = (
-  pathname: string,
-  pathnames: MeetingHeaderPathnames,
-): string => {
-  if (pathname === pathnames.attendee) return pathnames.attendees;
-  return pathnames.meeting;
-};
-
-const getParentName = (currentName: string): string => {
-  if (currentName === "Attendee") return "Attendees";
-  return "";
-};
-
 interface MeetingHeaderProps {
   meeting: Meeting;
-  pathnames: MeetingHeaderPathnames;
 }
 
-export const MeetingHeader: React.FC<MeetingHeaderProps> = ({
-  meeting,
-  pathnames,
-}) => {
-  const pathname = usePathname();
+export const MeetingHeader: React.FC<MeetingHeaderProps> = ({ meeting }) => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
+  const attendeeId = searchParams.get("attendeeId");
 
-  const getCurrentSection = (): { name: string; isSubpage: boolean } => {
-    if (pathname === pathnames.attendees)
-      return { name: "Attendees", isSubpage: false };
-    if (pathname === pathnames.attendee)
-      return { name: "Attendee", isSubpage: true };
-    return { name: "", isSubpage: false };
-  };
+  const meetingHref = `/meetings/${meeting.id}`;
+  const attendeesHref = `${meetingHref}?tab=attendees`;
 
-  const currentSection = getCurrentSection();
+  const showAttendeesCrumb = tab === "attendees" || tab === "attendee";
+  const showAttendeeCrumb = tab === "attendee" && attendeeId;
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -81,9 +56,9 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              {currentSection.name ? (
+              {showAttendeesCrumb ? (
                 <BreadcrumbLink
-                  href={pathnames.meeting}
+                  href={meetingHref}
                   className="flex items-center gap-1"
                 >
                   {meeting.title}
@@ -94,31 +69,31 @@ export const MeetingHeader: React.FC<MeetingHeaderProps> = ({
                 </BreadcrumbPage>
               )}
             </BreadcrumbItem>
-            {currentSection.name && (
+            {showAttendeesCrumb && (
               <>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  {currentSection.isSubpage ? (
+                  {showAttendeeCrumb ? (
                     <BreadcrumbLink
-                      href={getParentPath(pathname, pathnames)}
+                      href={attendeesHref}
                       className="flex items-center gap-1"
                     >
-                      {getParentName(currentSection.name)}
+                      Attendees
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage className="flex items-center gap-1">
-                      {currentSection.name}
+                      Attendees
                     </BreadcrumbPage>
                   )}
                 </BreadcrumbItem>
               </>
             )}
-            {currentSection.isSubpage && (
+            {showAttendeeCrumb && (
               <>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbPage className="flex items-center gap-1">
-                    {currentSection.name}
+                    Attendee
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </>
