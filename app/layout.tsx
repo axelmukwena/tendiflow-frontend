@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { FC } from "react";
 
+import { BackendWarmup } from "@/components/backend-warmup";
 import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
 
 import { Providers } from "./providers";
@@ -75,6 +76,7 @@ const RootLayout: FC<RootLayoutProps> = ({ children }) => {
         className={`${interSans.variable} antialiased`}
         suppressHydrationWarning
       >
+        <BackendWarmup />
         <Providers>{children}</Providers>
       </body>
     </html>
