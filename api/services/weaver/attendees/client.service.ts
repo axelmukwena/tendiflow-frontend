@@ -55,6 +55,7 @@ export class AttendeeClientService {
    */
   async getGuestByFingerprint({
     organisation_id,
+    meeting_id,
     device_fingerprint,
   }: GetGuestAttendeeClientProps): Promise<
     DataServiceResponse<Attendee | null>
@@ -64,8 +65,9 @@ export class AttendeeClientService {
         [HeaderKey.CONTENT_TYPE]: "application/json",
         [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
       };
+      const qs = new URLSearchParams({ meeting_id }).toString();
       const response = await fetch(
-        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}`,
+        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}?${qs}`,
         {
           method: "GET",
           headers,
@@ -88,6 +90,7 @@ export class AttendeeClientService {
    */
   async updateGuestByFingerprint({
     organisation_id,
+    meeting_id,
     device_fingerprint,
     data,
   }: UpdateGuestAttendeeClientProps): Promise<
@@ -98,8 +101,9 @@ export class AttendeeClientService {
         [HeaderKey.CONTENT_TYPE]: "application/json",
         [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
       };
+      const qs = new URLSearchParams({ meeting_id }).toString();
       const response = await fetch(
-        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}`,
+        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}?${qs}`,
         {
           method: "PUT",
           headers,
@@ -123,6 +127,7 @@ export class AttendeeClientService {
    */
   async cancelGuestByFingerprint({
     organisation_id,
+    meeting_id,
     device_fingerprint,
   }: CancelGuestAttendanceClientProps): Promise<
     DataServiceResponse<Attendee | null>
@@ -132,8 +137,9 @@ export class AttendeeClientService {
         [HeaderKey.CONTENT_TYPE]: "application/json",
         [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
       };
+      const qs = new URLSearchParams({ meeting_id }).toString();
       const response = await fetch(
-        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}`,
+        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}?${qs}`,
         {
           method: "DELETE",
           headers,
@@ -156,6 +162,7 @@ export class AttendeeClientService {
    */
   async submitGuestFeedback(
     organisationId: string,
+    meetingId: string,
     deviceFingerprint: string,
     data: AttendeeFeedbackCreateClient,
   ): Promise<DataServiceResponse<Attendee | null>> {
@@ -164,8 +171,9 @@ export class AttendeeClientService {
         [HeaderKey.CONTENT_TYPE]: "application/json",
         [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
       };
+      const qs = new URLSearchParams({ meeting_id: meetingId }).toString();
       const response = await fetch(
-        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/${deviceFingerprint}/feedback`,
+        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/${deviceFingerprint}/feedback?${qs}`,
         {
           method: "POST",
           headers,

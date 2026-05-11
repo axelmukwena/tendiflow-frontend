@@ -84,6 +84,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
 
   const { attendee, getByFingerprint } = useGuestAttendee({
     organisationId,
+    meetingId,
     deviceFingerprint,
   });
   const attendeeForm = useAttendeeForm({ meetingId, attendee });
@@ -129,9 +130,11 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
 
         setMetadata(fullMetadata);
 
-        // Check if already checked in
+        // Check if already checked in for THIS meeting (fingerprint is scoped
+        // per meeting on the backend so the same device can attend others).
         const hasExistingCheckIn = await getByFingerprint(
           organisationId,
+          meetingId,
           result.visitorId,
         );
 
@@ -202,7 +205,15 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
       setFlowInitialized(true);
       initializeFlow();
     }
-  }, [meeting, meetingLoading, organisationId, getByFingerprint, attendeeForm]);
+  }, [
+    meeting,
+    meetingLoading,
+    organisationId,
+    meetingId,
+    flowInitialized,
+    getByFingerprint,
+    attendeeForm,
+  ]);
 
   // Handle permissions request
   const handlePermissionsRequest = async (): Promise<void> => {

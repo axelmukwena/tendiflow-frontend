@@ -16,6 +16,7 @@ const service = new AttendeeClientService();
 
 interface UseGuestAttendeeProps {
   organisationId?: string | null;
+  meetingId?: string | null;
   deviceFingerprint?: string | null;
 }
 
@@ -37,19 +38,23 @@ export interface UseGuestAttendeeReturn {
   ) => Promise<FunctionReturn>;
   getByFingerprint: (
     organisationId: string,
+    meetingId: string,
     deviceFingerprint: string,
   ) => Promise<FunctionReturn>;
   updateByFingerprint: (
     organisationId: string,
+    meetingId: string,
     deviceFingerprint: string,
     data: AttendeeUpdateGuestClient,
   ) => Promise<FunctionReturn>;
   cancelByFingerprint: (
     organisationId: string,
+    meetingId: string,
     deviceFingerprint: string,
   ) => Promise<FunctionReturn>;
   submitFeedback: (
     organisationId: string,
+    meetingId: string,
     deviceFingerprint: string,
     data: AttendeeFeedbackCreateClient,
   ) => Promise<FunctionReturn>;
@@ -60,14 +65,17 @@ export interface UseGuestAttendeeReturn {
 }
 
 /**
- * Generate SWR key for guest attendee
+ * Generate SWR key for guest attendee. Keyed per (org, meeting, fingerprint)
+ * because the same device fingerprint can correspond to a different attendee
+ * record in each meeting.
  */
 const getGuestAttendeeSwrKey = (
   organisationId?: string | null,
+  meetingId?: string | null,
   deviceFingerprint?: string | null,
 ): string | null => {
-  if (!organisationId || !deviceFingerprint) return null;
-  return `guest-attendee-${organisationId}-${deviceFingerprint}`;
+  if (!organisationId || !meetingId || !deviceFingerprint) return null;
+  return `guest-attendee-${organisationId}-${meetingId}-${deviceFingerprint}`;
 };
 
 /**
@@ -75,16 +83,18 @@ const getGuestAttendeeSwrKey = (
  */
 export const useGuestAttendee = ({
   organisationId,
+  meetingId,
   deviceFingerprint,
 }: UseGuestAttendeeProps = {}): UseGuestAttendeeReturn => {
   const { mutate } = useSWRConfig();
 
   // Fetcher function for SWR
   const fetcher = async (): Promise<Attendee | null> => {
-    if (!organisationId || !deviceFingerprint) return null;
+    if (!organisationId || !meetingId || !deviceFingerprint) return null;
 
     const response = await service.getGuestByFingerprint({
       organisation_id: organisationId,
+      meeting_id: meetingId,
       device_fingerprint: deviceFingerprint,
     });
 
@@ -95,7 +105,11 @@ export const useGuestAttendee = ({
     }
   };
 
-  const swrKey = getGuestAttendeeSwrKey(organisationId, deviceFingerprint);
+  const swrKey = getGuestAttendeeSwrKey(
+    organisationId,
+    meetingId,
+    deviceFingerprint,
+  );
 
   const { data, error, isLoading } = useSWR(swrKey, fetcher, {
     revalidateOnFocus: false,
@@ -107,10 +121,15 @@ export const useGuestAttendee = ({
   const mutateAttendeeCache = useCallback(
     (
       targetOrgId: string,
+      targetMeetingId: string,
       targetFingerprint: string,
       newData?: Attendee | null,
     ) => {
-      const targetKey = getGuestAttendeeSwrKey(targetOrgId, targetFingerprint);
+      const targetKey = getGuestAttendeeSwrKey(
+        targetOrgId,
+        targetMeetingId,
+        targetFingerprint,
+      );
       if (targetKey) {
         mutate(targetKey, newData, { revalidate: newData === undefined });
       }
@@ -129,6 +148,7 @@ export const useGuestAttendee = ({
           // Update cache with new attendee data
           mutateAttendeeCache(
             organisationId,
+            data.meeting_id,
             data.checkin.device_fingerprint,
             response.data,
           );
@@ -159,17 +179,23 @@ export const useGuestAttendee = ({
   const getByFingerprint = useCallback(
     async (
       organisationId: string,
+      meetingId: string,
       deviceFingerprint: string,
     ): Promise<FunctionReturn> => {
       try {
         const response = await service.getGuestByFingerprint({
           organisation_id: organisationId,
+          meeting_id: meetingId,
           device_fingerprint: deviceFingerprint,
         });
 
         if (response.success && response.data) {
-          // Update cache with fetched data
-          mutateAttendeeCache(organisationId, deviceFingerprint, response.data);
+          mutateAttendeeCache(
+            organisationId,
+            meetingId,
+            deviceFingerprint,
+            response.data,
+          );
           return {
             attendee: response.data,
             success: true,
@@ -197,19 +223,25 @@ export const useGuestAttendee = ({
   const updateByFingerprint = useCallback(
     async (
       organisationId: string,
+      meetingId: string,
       deviceFingerprint: string,
       data: AttendeeUpdateGuestClient,
     ): Promise<FunctionReturn> => {
       try {
         const response = await service.updateGuestByFingerprint({
           organisation_id: organisationId,
+          meeting_id: meetingId,
           device_fingerprint: deviceFingerprint,
           data,
         });
 
         if (response.success && response.data) {
-          // Update cache with updated data
-          mutateAttendeeCache(organisationId, deviceFingerprint, response.data);
+          mutateAttendeeCache(
+            organisationId,
+            meetingId,
+            deviceFingerprint,
+            response.data,
+          );
           return {
             attendee: response.data,
             success: true,
@@ -237,17 +269,23 @@ export const useGuestAttendee = ({
   const cancelByFingerprint = useCallback(
     async (
       organisationId: string,
+      meetingId: string,
       deviceFingerprint: string,
     ): Promise<FunctionReturn> => {
       try {
         const response = await service.cancelGuestByFingerprint({
           organisation_id: organisationId,
+          meeting_id: meetingId,
           device_fingerprint: deviceFingerprint,
         });
 
         if (response.success) {
-          // Remove from cache or set to null after cancellation
-          mutateAttendeeCache(organisationId, deviceFingerprint, null);
+          mutateAttendeeCache(
+            organisationId,
+            meetingId,
+            deviceFingerprint,
+            null,
+          );
           return {
             attendee: null,
             success: true,
@@ -275,19 +313,20 @@ export const useGuestAttendee = ({
   const submitFeedback = useCallback(
     async (
       organisationId: string,
+      meetingId: string,
       deviceFingerprint: string,
       data: AttendeeFeedbackCreateClient,
     ): Promise<FunctionReturn> => {
       try {
         const response = await service.submitGuestFeedback(
           organisationId,
+          meetingId,
           deviceFingerprint,
           data,
         );
 
         if (response.success) {
-          // Revalidate cache after feedback submission
-          mutateAttendeeCache(organisationId, deviceFingerprint);
+          mutateAttendeeCache(organisationId, meetingId, deviceFingerprint);
           return {
             attendee: null,
             success: true,
@@ -313,16 +352,16 @@ export const useGuestAttendee = ({
   );
 
   const mutateAttendee = useCallback(() => {
-    if (organisationId && deviceFingerprint) {
-      mutateAttendeeCache(organisationId, deviceFingerprint);
+    if (organisationId && meetingId && deviceFingerprint) {
+      mutateAttendeeCache(organisationId, meetingId, deviceFingerprint);
     }
-  }, [organisationId, deviceFingerprint, mutateAttendeeCache]);
+  }, [organisationId, meetingId, deviceFingerprint, mutateAttendeeCache]);
 
   const reset = useCallback(() => {
-    if (organisationId && deviceFingerprint) {
-      mutateAttendeeCache(organisationId, deviceFingerprint, null);
+    if (organisationId && meetingId && deviceFingerprint) {
+      mutateAttendeeCache(organisationId, meetingId, deviceFingerprint, null);
     }
-  }, [organisationId, deviceFingerprint, mutateAttendeeCache]);
+  }, [organisationId, meetingId, deviceFingerprint, mutateAttendeeCache]);
 
   return {
     attendee: data || null,

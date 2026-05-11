@@ -30,6 +30,7 @@ export const POST = async (
   try {
     const params = await context.params;
     const { organisationId, deviceFingerprint } = params;
+    const meetingId = req.nextUrl.searchParams.get("meeting_id");
     const feedbackData: AttendeeFeedbackCreate = await req.json();
 
     if (!organisationId || !deviceFingerprint) {
@@ -41,12 +42,19 @@ export const POST = async (
         { status: 400 },
       );
     }
+    if (!meetingId) {
+      return NextResponse.json(
+        { success: false, message: "Missing meeting ID" },
+        { status: 400 },
+      );
+    }
 
     const headers = getHeadersNextRequest(req);
     const attendeeService = new AttendeeNoTokenService(headers);
 
     const requestResponse = await attendeeService.submitGuestFeedback({
       organisation_id: organisationId,
+      meeting_id: meetingId,
       device_fingerprint: deviceFingerprint,
       data: feedbackData,
     });

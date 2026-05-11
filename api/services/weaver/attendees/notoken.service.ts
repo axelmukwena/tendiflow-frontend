@@ -73,6 +73,7 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
    */
   async getGuestByFingerprint({
     organisation_id,
+    meeting_id,
     device_fingerprint,
   }: GetGuestAttendeeProps): Promise<DataServiceResponse<Attendee | null>> {
     try {
@@ -82,6 +83,7 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
           device_fingerprint,
           action: ApiActionAttendee.GET_GUEST_BY_FINGERPRINT,
         }),
+        { params: { meeting_id } },
       );
 
       if (
@@ -116,6 +118,7 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
    */
   async updateGuestByFingerprint({
     organisation_id,
+    meeting_id,
     device_fingerprint,
     data,
   }: UpdateGuestAttendeeProps): Promise<DataServiceResponse<Attendee | null>> {
@@ -127,6 +130,7 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
           action: ApiActionAttendee.UPDATE_GUEST_BY_FINGERPRINT,
         }),
         data,
+        { params: { meeting_id } },
       );
 
       if (
@@ -161,6 +165,7 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
    */
   async cancelGuestByFingerprint({
     organisation_id,
+    meeting_id,
     device_fingerprint,
   }: CancelGuestAttendanceProps): Promise<
     DataServiceResponse<Attendee | null>
@@ -173,6 +178,7 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
           action: ApiActionAttendee.CANCEL_GUEST_BY_FINGERPRINT,
         }),
         {},
+        { params: { meeting_id } },
       );
 
       if (
@@ -207,6 +213,7 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
    */
   async submitGuestFeedback({
     organisation_id,
+    meeting_id,
     device_fingerprint,
     data,
   }: SubmitGuestFeedbackProps): Promise<DataServiceResponse<Attendee | null>> {
@@ -218,6 +225,7 @@ export class AttendeeNoTokenService extends WeaverNoTokenApiService {
           action: ApiActionAttendee.SUBMIT_GUEST_FEEDBACK,
         }),
         data,
+        { params: { meeting_id } },
       );
 
       if (

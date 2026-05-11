@@ -121,6 +121,7 @@ export const useGuestAttendeeCreateUpdate = ({
       const data = getGuestAttendeeUpdateData({ values });
       const fingerprintResponse = await updateByFingerprint(
         organisationId,
+        attendee.meeting_id,
         attendee.checkin.device_fingerprint,
         data,
       );

@@ -254,6 +254,7 @@ export interface GuestCheckinProps {
 
 export interface GetGuestAttendeeClientProps {
   organisation_id: string;
+  meeting_id: string;
   device_fingerprint: string;
 }
 
@@ -261,6 +262,7 @@ export type GetGuestAttendeeProps = GetGuestAttendeeClientProps;
 
 export interface UpdateGuestAttendeeClientProps {
   organisation_id: string;
+  meeting_id: string;
   device_fingerprint: string;
   data: AttendeeUpdateGuestClient;
 }
@@ -268,6 +270,7 @@ export type UpdateGuestAttendeeProps = UpdateGuestAttendeeClientProps;
 
 export interface CancelGuestAttendanceClientProps {
   organisation_id: string;
+  meeting_id: string;
   device_fingerprint: string;
 }
 export type CancelGuestAttendanceProps = CancelGuestAttendanceClientProps;
@@ -302,6 +305,7 @@ export interface SubmitFeedbackProps {
 
 export interface SubmitGuestFeedbackProps {
   organisation_id: string;
+  meeting_id: string;
   device_fingerprint: string;
   data: AttendeeFeedbackCreate;
 }

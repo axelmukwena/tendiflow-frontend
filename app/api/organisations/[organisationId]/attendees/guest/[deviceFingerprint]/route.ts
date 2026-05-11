@@ -15,6 +15,12 @@ interface RouteContext {
   params: RouteParams;
 }
 
+const missingMeetingResponse = (): NextResponse =>
+  NextResponse.json(
+    { success: false, message: "Missing meeting ID" },
+    { status: 400 },
+  );
+
 export const GET = async (
   req: NextRequest,
   context: RouteContext,
@@ -30,6 +36,7 @@ export const GET = async (
   try {
     const params = await context.params;
     const { organisationId, deviceFingerprint } = params;
+    const meetingId = req.nextUrl.searchParams.get("meeting_id");
 
     if (!organisationId || !deviceFingerprint) {
       return NextResponse.json(
@@ -40,12 +47,14 @@ export const GET = async (
         { status: 400 },
       );
     }
+    if (!meetingId) return missingMeetingResponse();
 
     const headers = getHeadersNextRequest(req);
     const attendeeService = new AttendeeNoTokenService(headers);
 
     const requestResponse = await attendeeService.getGuestByFingerprint({
       organisation_id: organisationId,
+      meeting_id: meetingId,
       device_fingerprint: deviceFingerprint,
     });
 
@@ -76,6 +85,7 @@ export const PUT = async (
   try {
     const params = await context.params;
     const { organisationId, deviceFingerprint } = params;
+    const meetingId = req.nextUrl.searchParams.get("meeting_id");
     const updateData: AttendeeUpdateGuest = await req.json();
 
     if (!organisationId || !deviceFingerprint) {
@@ -87,12 +97,14 @@ export const PUT = async (
         { status: 400 },
       );
     }
+    if (!meetingId) return missingMeetingResponse();
 
     const headers = getHeadersNextRequest(req);
     const attendeeService = new AttendeeNoTokenService(headers);
 
     const requestResponse = await attendeeService.updateGuestByFingerprint({
       organisation_id: organisationId,
+      meeting_id: meetingId,
       device_fingerprint: deviceFingerprint,
       data: updateData,
     });
@@ -124,6 +136,7 @@ export const DELETE = async (
   try {
     const params = await context.params;
     const { organisationId, deviceFingerprint } = params;
+    const meetingId = req.nextUrl.searchParams.get("meeting_id");
 
     if (!organisationId || !deviceFingerprint) {
       return NextResponse.json(
@@ -134,12 +147,14 @@ export const DELETE = async (
         { status: 400 },
       );
     }
+    if (!meetingId) return missingMeetingResponse();
 
     const headers = getHeadersNextRequest(req);
     const attendeeService = new AttendeeNoTokenService(headers);
 
     const requestResponse = await attendeeService.cancelGuestByFingerprint({
       organisation_id: organisationId,
+      meeting_id: meetingId,
       device_fingerprint: deviceFingerprint,
     });
 
