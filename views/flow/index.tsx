@@ -619,15 +619,15 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <div className="flex-grow flex items-center justify-center p-4">
-          <div className="flex flex-col justify-center py-4 max-w-md w-full overflow-hidden">
-            <div className="flex flex-col items-center gap-4 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="flex flex-col justify-center py-4 max-w-lg w-full overflow-hidden">
+            <div className="flex flex-col items-center gap-4 sm:mx-auto sm:w-full sm:max-w-lg">
               <LogoVertical wordWidth={110} showWord={false} />
               <h2 className="text-center text-2xl/7 font-bold text-gray-900">
                 Meeting Check-in
               </h2>
             </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
               <div className="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
                 <div className="pb-5 mb-5 border-b border-gray-200">
                   <h3 className="text-lg/7 font-medium text-gray-900">

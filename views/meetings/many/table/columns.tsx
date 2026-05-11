@@ -1,9 +1,9 @@
 import { Calendar, Clock, MapPin, Tag, Users } from "lucide-react";
 import { ReactNode } from "react";
-import { Column } from "react-data-grid";
 
 import { Meeting } from "@/api/services/weaver/meetings/types";
 import { WeaverLink } from "@/components/common/weaver-link";
+import { DataTableColumn } from "@/components/datagrid/data-table";
 import { Badge } from "@/components/ui/badge";
 import {
   getFormattedDate,
@@ -49,27 +49,24 @@ const getStatusBadgeVariant = (
 
 export const MeetingColumns = (
   props: MeetingColumnsProps,
-): readonly Column<Meeting>[] => [
+): readonly DataTableColumn<Meeting>[] => [
   {
     key: "actions",
     name: "",
-    cellClass: "actions-cell",
+    width: 50,
+    frozen: true,
+    className: "p-1.5",
     renderCell: ({ row }) => (
       <MeetingActionsMenu
         meeting={row}
         handleMutateMeetings={props.handleMutateMeetings}
       />
     ),
-    width: 50,
-    resizable: false,
-    frozen: true,
   },
   {
     key: "title",
     name: "Meeting",
     width: 300,
-    resizable: true,
-    sortable: true,
     renderCell: ({ row }): ReactNode => (
       <div className="space-y-1">
         <WeaverLink
@@ -90,8 +87,6 @@ export const MeetingColumns = (
     key: "start_datetime",
     name: "Date & Time",
     width: 180,
-    resizable: true,
-    sortable: true,
     renderCell: ({ row }): ReactNode => (
       <div className="space-y-1">
         <div className="flex items-center text-sm text-gray-900">
@@ -109,8 +104,7 @@ export const MeetingColumns = (
   {
     key: "duration",
     name: "Duration",
-    width: 80,
-    resizable: true,
+    width: 90,
     renderCell: ({ row }): ReactNode => (
       <span className="text-sm text-gray-700">
         {formatDuration(row.start_datetime, row.end_datetime)}
@@ -120,9 +114,7 @@ export const MeetingColumns = (
   {
     key: "expected_attendees",
     name: "Expected Attendees",
-    width: 100,
-    resizable: true,
-    sortable: true,
+    width: 160,
     renderCell: ({ row }): ReactNode => (
       <div className="flex items-center text-sm text-gray-900">
         <Users className="w-4 h-4 mr-2 text-gray-400" />
@@ -133,8 +125,7 @@ export const MeetingColumns = (
   {
     key: "address",
     name: "Location",
-    width: 200,
-    resizable: true,
+    width: 220,
     renderCell: ({ row }): ReactNode => {
       if (row.address) {
         return (
@@ -161,8 +152,7 @@ export const MeetingColumns = (
   {
     key: "timezone",
     name: "Timezone",
-    width: 120,
-    resizable: true,
+    width: 140,
     renderCell: ({ row }): ReactNode => (
       <Badge variant="outline" className="font-mono text-xs">
         {row.timezone}
@@ -173,8 +163,6 @@ export const MeetingColumns = (
     key: "database_status",
     name: "Status",
     width: 100,
-    resizable: true,
-    sortable: true,
     renderCell: ({ row }): ReactNode => (
       <Badge variant={getStatusBadgeVariant(row.database_status)}>
         {row.database_status.charAt(0).toUpperCase() +
@@ -185,8 +173,7 @@ export const MeetingColumns = (
   {
     key: "tags",
     name: "Tags",
-    width: 150,
-    resizable: true,
+    width: 160,
     renderCell: ({ row }): ReactNode => {
       if (!row.tags || row.tags.length === 0) {
         return <span className="text-sm text-gray-400">-</span>;
@@ -212,7 +199,6 @@ export const MeetingColumns = (
     key: "recurring",
     name: "Recurring",
     width: 100,
-    resizable: true,
     renderCell: ({ row }): ReactNode => (
       <Badge variant={row.recurring_pattern ? "default" : "outline"}>
         {row.recurring_pattern ? "Yes" : "No"}
@@ -223,7 +209,6 @@ export const MeetingColumns = (
     key: "location_verification",
     name: "Verification",
     width: 120,
-    resizable: true,
     renderCell: ({ row }): ReactNode => (
       <Badge
         variant={
@@ -237,8 +222,7 @@ export const MeetingColumns = (
   {
     key: "attachments",
     name: "Files",
-    width: 80,
-    resizable: true,
+    width: 90,
     renderCell: ({ row }): ReactNode => {
       const fileCount = [
         row.image ? 1 : 0,
@@ -259,8 +243,7 @@ export const MeetingColumns = (
   {
     key: "notes",
     name: "Notes",
-    width: 200,
-    resizable: true,
+    width: 220,
     renderCell: ({ row }): ReactNode => {
       if (!row.notes) return <span className="text-sm text-gray-400">-</span>;
       return (
@@ -273,9 +256,7 @@ export const MeetingColumns = (
   {
     key: "created_at",
     name: "Created",
-    sortable: true,
-    width: 160,
-    resizable: true,
+    width: 170,
     renderCell: ({ row }): ReactNode => (
       <div className="text-sm text-gray-700">
         {getFormattedDateAndTime({ utc: row.created_at })}
@@ -285,9 +266,7 @@ export const MeetingColumns = (
   {
     key: "updated_at",
     name: "Updated",
-    sortable: true,
-    width: 160,
-    resizable: true,
+    width: 170,
     renderCell: ({ row }): ReactNode => (
       <div className="text-sm text-gray-700">
         {row.updated_at

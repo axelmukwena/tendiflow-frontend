@@ -1,4 +1,4 @@
-import { Copy, Download, ExternalLink, Eye, QrCode } from "lucide-react";
+import { Copy, Download, Expand, ExternalLink, QrCode } from "lucide-react";
 import { FC, useState } from "react";
 
 import { WeaverFile } from "@/api/services/weaver/types/file";
@@ -123,24 +123,14 @@ export const QrCodeDisplay: FC<QrCodeDisplayProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  handleCopyToClipboard(qrcodeUrl, "QR code link copied!")
-                }
-              >
-                <Copy className="size-4 mr-2" />
-                Copy Link
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
                 onClick={() => setIsViewerOpen(true)}
               >
-                <Eye className="size-4 mr-2" />
-                View
+                <Expand className="size-4 mr-2" />
+                Expand QR Code
               </Button>
               <Button variant="outline" size="sm" onClick={handleDownload}>
                 <Download className="size-4 mr-2" />
-                Download
+                Download QR Code
               </Button>
             </div>
             {isFalse && checkInUrl && (

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./datagrid.css";
 
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);

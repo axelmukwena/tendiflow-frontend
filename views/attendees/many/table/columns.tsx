@@ -1,12 +1,12 @@
 import { Calendar, CheckCircle, MapPin, Star } from "lucide-react";
 import { ReactNode } from "react";
-import { Column } from "react-data-grid";
 
 import {
   AttendanceStatus,
   Attendee,
 } from "@/api/services/weaver/attendees/types";
 import { WeaverLink } from "@/components/common/weaver-link";
+import { DataTableColumn } from "@/components/datagrid/data-table";
 import { Badge } from "@/components/ui/badge";
 import {
   getFormattedDate,
@@ -58,27 +58,24 @@ const formatAttendanceStatus = (status: AttendanceStatus): string => {
 
 export const AttendeeColumns = (
   props: AttendeeColumnsProps,
-): readonly Column<Attendee>[] => [
+): readonly DataTableColumn<Attendee>[] => [
   {
     key: "actions",
     name: "",
-    cellClass: "actions-cell",
+    width: 50,
+    frozen: true,
+    className: "p-1.5",
     renderCell: ({ row }) => (
       <AttendeeActionsMenu
         attendee={row}
         handleMutateAttendees={props.handleMutateAttendees}
       />
     ),
-    width: 50,
-    resizable: false,
-    frozen: true,
   },
   {
     key: "name",
     name: "Attendee",
     width: 250,
-    resizable: true,
-    sortable: true,
     renderCell: ({ row }): ReactNode => (
       <WeaverLink
         href={`/meetings/${row.meeting_id}/attendees/${row.id}`}
@@ -91,8 +88,7 @@ export const AttendeeColumns = (
   {
     key: "email",
     name: "Email",
-    width: 200,
-    resizable: true,
+    width: 220,
     renderCell: ({ row }): ReactNode => (
       <span className="truncate">{row.email}</span>
     ),
@@ -100,9 +96,7 @@ export const AttendeeColumns = (
   {
     key: "attendance_status",
     name: "Status",
-    width: 120,
-    resizable: true,
-    sortable: true,
+    width: 130,
     renderCell: ({ row }): ReactNode => (
       <Badge variant={getAttendanceStatusVariant(row.attendance_status)}>
         {formatAttendanceStatus(row.attendance_status)}
@@ -113,8 +107,6 @@ export const AttendeeColumns = (
     key: "organisation_name",
     name: "Organisation",
     width: 180,
-    resizable: true,
-    sortable: true,
     renderCell: ({ row }): ReactNode => {
       if (!row.organisation_name) {
         return <span className="text-sm text-gray-400">-</span>;
@@ -126,16 +118,14 @@ export const AttendeeColumns = (
     key: "division",
     name: "Division",
     width: 150,
-    resizable: true,
-    renderCell: ({ row }): ReactNode => {
-      return <span className="truncate">{row.division || "-"}</span>;
-    },
+    renderCell: ({ row }): ReactNode => (
+      <span className="truncate">{row.division || "-"}</span>
+    ),
   },
   {
     key: "occupation",
     name: "Occupation",
     width: 150,
-    resizable: true,
     renderCell: ({ row }): ReactNode => (
       <span className="truncate">{row.occupation || "-"}</span>
     ),
@@ -143,8 +133,7 @@ export const AttendeeColumns = (
   {
     key: "phone_number",
     name: "Phone",
-    width: 130,
-    resizable: true,
+    width: 140,
     renderCell: ({ row }): ReactNode => {
       if (!row.phone_number) {
         return <span className="truncate">-</span>;
@@ -155,8 +144,7 @@ export const AttendeeColumns = (
   {
     key: "meeting",
     name: "Meeting",
-    width: 200,
-    resizable: true,
+    width: 220,
     renderCell: ({ row }): ReactNode => {
       if (!row.meeting) {
         return <span className="text-sm text-gray-400">-</span>;
@@ -182,8 +170,7 @@ export const AttendeeColumns = (
   {
     key: "checkin_status",
     name: "Check-in",
-    width: 120,
-    resizable: true,
+    width: 140,
     renderCell: ({ row }): ReactNode => {
       if (!row.checkin) {
         return <span className="text-sm text-gray-400">-</span>;
@@ -204,8 +191,7 @@ export const AttendeeColumns = (
   {
     key: "checkin_location",
     name: "Check-in Location",
-    width: 150,
-    resizable: true,
+    width: 200,
     renderCell: ({ row }): ReactNode => {
       if (!row.checkin?.checkin_location) {
         return <span className="text-sm text-gray-400">-</span>;
@@ -232,7 +218,6 @@ export const AttendeeColumns = (
     key: "feedback_rating",
     name: "Rating",
     width: 100,
-    resizable: true,
     renderCell: ({ row }): ReactNode => {
       if (!row.feedback?.rating) {
         return <span className="text-sm text-gray-400">-</span>;
@@ -248,8 +233,7 @@ export const AttendeeColumns = (
   {
     key: "feedback_comment",
     name: "Feedback",
-    width: 200,
-    resizable: true,
+    width: 220,
     renderCell: ({ row }): ReactNode => {
       if (!row.feedback?.comment) {
         return <span className="text-sm text-gray-400">-</span>;
@@ -267,8 +251,7 @@ export const AttendeeColumns = (
   {
     key: "custom_fields",
     name: "Custom Fields",
-    width: 120,
-    resizable: true,
+    width: 130,
     renderCell: ({ row }): ReactNode => {
       if (
         !row.custom_field_responses ||
@@ -287,9 +270,7 @@ export const AttendeeColumns = (
   {
     key: "database_status",
     name: "Database Status",
-    width: 100,
-    resizable: true,
-    sortable: true,
+    width: 130,
     renderCell: ({ row }): ReactNode => (
       <Badge variant={getDatabaseStatusVariant(row.database_status)}>
         {row.database_status.charAt(0).toUpperCase() +
@@ -300,9 +281,7 @@ export const AttendeeColumns = (
   {
     key: "created_at",
     name: "Registered",
-    sortable: true,
-    width: 160,
-    resizable: true,
+    width: 170,
     renderCell: ({ row }): ReactNode => (
       <div className="text-sm text-gray-700">
         {getFormattedDateAndTime({ utc: row.created_at })}
@@ -312,9 +291,7 @@ export const AttendeeColumns = (
   {
     key: "updated_at",
     name: "Updated",
-    sortable: true,
-    width: 160,
-    resizable: true,
+    width: 170,
     renderCell: ({ row }): ReactNode => (
       <div className="text-sm text-gray-700">
         {row.updated_at
