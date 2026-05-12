@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { FormEvent, KeyboardEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -27,10 +26,9 @@ import { UseEmailVerificationConfirmForm } from "../types";
  */
 export const useEmailVerificationConfirmForm =
   (): UseEmailVerificationConfirmForm => {
-    const { currentUser, mutateCurrentUser } = useCurrentUserContext();
+    const { currentUser } = useCurrentUserContext();
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [isResending, setIsResending] = useState<boolean>(false);
-    const router = useRouter();
     const { previousPathname } = usePreviousPathname();
 
     const hook = useForm<EmailVerificationConfirmFormSchema>({
@@ -90,12 +88,17 @@ export const useEmailVerificationConfirmForm =
 
       if (res.success) {
         notify({ message: res.message, type: "success" });
-        mutateCurrentUser();
-        router.push(previousPathname || ClientPathname.HOME);
-      } else {
-        notify({ message: res.message, type: "error" });
+        // Hard reload so the server component re-fetches the now-verified
+        // user; client-side router.push would keep stale auth state and
+        // RequireAuth would bounce us back here. Delay lets the toast show.
+        const destination = previousPathname || ClientPathname.HOME;
+        setTimeout(() => {
+          window.location.assign(destination);
+        }, 1500);
+        return;
       }
 
+      notify({ message: res.message, type: "error" });
       setIsSubmitting(false);
     };
 
