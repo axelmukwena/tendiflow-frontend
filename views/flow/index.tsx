@@ -185,27 +185,21 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           return;
         }
 
-        // Populate the location-independent parts of the form now, so they
-        // survive an early-return to the permissions step. Without this,
-        // users taking the permissions path submit a payload missing
-        // device_fingerprint / session_id / checkin_datetime / checkin_device
-        // and the backend rejects it with a "checkin field required" error.
-        attendeeForm.hook.setValue(
-          "checkin.device_fingerprint",
-          fullMetadata.fingerprint,
-        );
-        attendeeForm.hook.setValue(
-          "checkin.session_id",
-          fullMetadata.sessionId,
-        );
-        attendeeForm.hook.setValue(
-          "checkin.checkin_datetime",
-          new Date().toISOString(),
-        );
-        attendeeForm.hook.setValue(
-          "checkin.checkin_device",
-          fullMetadata.deviceInfo,
-        );
+        // Populate the form's `checkin` field as a single whole-object
+        // setValue. Form defaults set `checkin: null` for fresh guests, so
+        // we never rely on react-hook-form materialising a parent object
+        // from nested-path setValues — instead we always write the full
+        // shape. Survives an early-return to the permissions step
+        // (handlePermissionsRequest tops it up with the resolved coords).
+        // `checkin_datetime` is refreshed again in handleConfirmCheckIn
+        // so the timestamp reflects the actual confirm tap.
+        attendeeForm.hook.setValue("checkin", {
+          device_fingerprint: fullMetadata.fingerprint,
+          session_id: fullMetadata.sessionId,
+          checkin_datetime: new Date().toISOString(),
+          checkin_location: fullMetadata.locationInfo,
+          checkin_device: fullMetadata.deviceInfo,
+        });
 
         // Location handling for meetings that require it. Fast path:
         // if the browser already has permission cached for this origin,
@@ -247,15 +241,15 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           }
           fullMetadata.locationInfo = geoMetadata.locationInfo;
           setMetadata({ ...fullMetadata });
+          attendeeForm.hook.setValue("checkin", {
+            device_fingerprint: fullMetadata.fingerprint,
+            session_id: fullMetadata.sessionId,
+            checkin_datetime: new Date().toISOString(),
+            checkin_location: fullMetadata.locationInfo,
+            checkin_device: fullMetadata.deviceInfo,
+          });
         }
 
-        // Location is either the (0,0) placeholder or the resolved fast-path
-        // coords by this point; the permissions handler sets it when the
-        // user takes the gesture path.
-        attendeeForm.hook.setValue(
-          "checkin.checkin_location",
-          fullMetadata.locationInfo,
-        );
         setCurrentStep("form");
       } catch (error) {
         console.error("Error initializing check-in flow:", error);
@@ -329,15 +323,15 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           }
         }
 
-        // Update form data
-        attendeeForm.hook.setValue(
-          "checkin.checkin_location",
-          updatedMetadata.locationInfo,
-        );
-        attendeeForm.hook.setValue(
-          "checkin.checkin_device",
-          updatedMetadata.deviceInfo,
-        );
+        // Write the full checkin shape rather than relying on nested
+        // setValue creating a parent object from the form's null default.
+        attendeeForm.hook.setValue("checkin", {
+          device_fingerprint: updatedMetadata.fingerprint,
+          session_id: updatedMetadata.sessionId,
+          checkin_datetime: new Date().toISOString(),
+          checkin_location: updatedMetadata.locationInfo,
+          checkin_device: updatedMetadata.deviceInfo,
+        });
         setCurrentStep("form");
       }
     } catch (error) {
@@ -398,7 +392,19 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
       return;
     }
 
-    const success = await handleCreateGuest(formValues);
+    // Refresh checkin_datetime to the actual confirmation moment rather
+    // than the (potentially several seconds older) flow-init time, so the
+    // backend's on-time/late determination is accurate.
+    const submitValues = {
+      ...formValues,
+      checkin: formValues.checkin
+        ? {
+            ...formValues.checkin,
+            checkin_datetime: new Date().toISOString(),
+          }
+        : formValues.checkin,
+    };
+    const success = await handleCreateGuest(submitValues);
 
     if (success) {
       setCurrentStep("success");
