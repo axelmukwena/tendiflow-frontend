@@ -32,7 +32,10 @@ import { useGuestAttendee } from "@/hooks/attendees/guest";
 import { usePublicMeeting } from "@/hooks/meetings/public";
 import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 import { generateUUID } from "@/utilities/helpers/id";
-import { collectCheckInMetadata } from "@/utilities/helpers/location";
+import {
+  collectCheckInMetadata,
+  getGeolocationPermissionState,
+} from "@/utilities/helpers/location";
 
 import { GuestAttendeeForm } from "./form";
 
@@ -115,7 +118,14 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           return;
         }
 
-        const checkInMetadata = await collectCheckInMetadata();
+        // Skip GPS up-front: iOS Safari typically refuses to show the
+        // permission prompt outside a user gesture, so calling it here
+        // would just stall for ~12s and return empty coords. We hand
+        // off to the permissions step below, where the prompt fires
+        // from the user's tap and actually works.
+        const checkInMetadata = await collectCheckInMetadata({
+          requestLocation: false,
+        });
 
         // FingerprintJS load()/get() can hang on iOS Safari (ITP blocks
         // canvas/audio probes that the library uses). Race it against a
@@ -175,18 +185,33 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           return;
         }
 
-        // Validate location requirements
+        // Location handling for meetings that require it. Fast path:
+        // if the browser already has permission cached for this origin,
+        // call getCurrentPosition silently (no gesture needed) so repeat
+        // users don't see the permissions screen they've already passed.
+        // Otherwise, hand off to the permissions step where the prompt
+        // fires from a real tap — necessary because iOS Safari refuses
+        // to show the dialog outside a user gesture.
         if (meeting.settings.require_location_verification) {
-          if (!fullMetadata.locationInfo?.latitude) {
+          const permissionState = await getGeolocationPermissionState();
+          if (permissionState !== "granted") {
             setCurrentStep("permissions");
             return;
           }
-
+          const geoMetadata = await collectCheckInMetadata({
+            requestLocation: true,
+          });
+          if (!geoMetadata.locationInfo.latitude) {
+            // Permission cache says granted but the call returned no
+            // fix (revoked between query and call, hardware error,
+            // etc.). Fall back to the permissions screen.
+            setCurrentStep("permissions");
+            return;
+          }
           const locationValidation = validateCheckinLocation(
             meeting,
-            fullMetadata.locationInfo,
+            geoMetadata.locationInfo,
           );
-
           if (!locationValidation.isWithinRadius) {
             setValidationResult({
               isValid: false,
@@ -198,6 +223,8 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
             setCurrentStep("location_error");
             return;
           }
+          fullMetadata.locationInfo = geoMetadata.locationInfo;
+          setMetadata({ ...fullMetadata });
         }
 
         // Set form data and proceed to form

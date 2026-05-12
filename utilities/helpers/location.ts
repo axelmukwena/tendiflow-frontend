@@ -84,6 +84,41 @@ function getDeviceInfo(userAgent: string): AttendeeCheckinDevice {
 }
 
 /**
+ * Probe the browser's geolocation permission without invoking a prompt.
+ *
+ * Returns "granted" when the site already has permission (we can call
+ * getCurrentPosition silently with no gesture), "prompt" when the
+ * browser will show the native dialog on the next call, "denied" when
+ * the user has refused, and "unknown" when the Permissions API isn't
+ * available (very old browsers).
+ */
+export async function getGeolocationPermissionState(): Promise<
+  "granted" | "prompt" | "denied" | "unknown"
+> {
+  if (typeof navigator === "undefined" || !navigator.permissions) {
+    return "unknown";
+  }
+  try {
+    const result = await navigator.permissions.query({ name: "geolocation" });
+    return result.state;
+  } catch {
+    return "unknown";
+  }
+}
+
+interface CollectCheckInMetadataOptions {
+  /**
+   * Whether to call navigator.geolocation. Defaults to true.
+   *
+   * Set to false from non-gesture contexts (e.g. a useEffect on mount):
+   * iOS Safari often refuses to show the permission prompt outside a
+   * user tap, leaving the call to time out for nothing. Skip it there
+   * and call again from a button handler when a real gesture is available.
+   */
+  requestLocation?: boolean;
+}
+
+/**
  * Collect all browser-side check-in metadata.
  *
  * Intentionally has zero third-party network calls — these used to hang
@@ -92,7 +127,9 @@ function getDeviceInfo(userAgent: string): AttendeeCheckinDevice {
  * lat/lng via the Google Maps key, so the client only contributes what
  * it alone knows: GPS coords + the user agent.
  */
-export async function collectCheckInMetadata(): Promise<CheckInMetadata> {
+export async function collectCheckInMetadata(
+  { requestLocation = true }: CollectCheckInMetadataOptions = {},
+): Promise<CheckInMetadata> {
   const userAgent =
     typeof navigator !== "undefined" ? navigator.userAgent : "Unknown";
 
@@ -108,7 +145,11 @@ export async function collectCheckInMetadata(): Promise<CheckInMetadata> {
 
   const deviceInfo = getDeviceInfo(userAgent);
 
-  if (typeof navigator !== "undefined" && navigator.geolocation) {
+  if (
+    requestLocation &&
+    typeof navigator !== "undefined" &&
+    navigator.geolocation
+  ) {
     try {
       // The Geolocation API's `timeout` option only counts time spent
       // acquiring a fix AFTER the permission prompt has been resolved. On
