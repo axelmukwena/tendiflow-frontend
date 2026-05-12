@@ -1,4 +1,4 @@
-import { OrganisationIndustry } from "@/api/services/weaver/organisations/types";
+import { OrganisationIndustry } from "@/api/services/tendiflow/organisations/types";
 import { SelectOptionType } from "@/types/general";
 
 export const ORGANISATION_INDUSTRY_OPTIONS: SelectOptionType[] = [

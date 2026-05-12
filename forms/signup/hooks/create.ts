@@ -6,9 +6,9 @@ import { Control } from "react-hook-form";
 import {
   loginWithEmailPassword,
   signup,
-} from "@/api/services/weaver/oauth/fetchers";
-import { LoginRequestClient } from "@/api/services/weaver/oauth/types";
-import { requestEmailVerification } from "@/api/services/weaver/profile/fetchers";
+} from "@/api/services/tendiflow/oauth/fetchers";
+import { LoginRequestClient } from "@/api/services/tendiflow/oauth/types";
+import { requestEmailVerification } from "@/api/services/tendiflow/profile/fetchers";
 import { ClientPathname } from "@/types/paths";
 import { notify } from "@/utilities/helpers/toaster";
 

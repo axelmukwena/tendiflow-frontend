@@ -2,7 +2,7 @@ import { Check, Clipboard } from "lucide-react";
 import React, { MouseEvent, ReactNode, useEffect, useState } from "react";
 import { Action, toast } from "sonner";
 
-import { WeaverLink } from "@/components/common/weaver-link";
+import { TendiflowLink } from "@/components/common/tendiflow-link";
 
 import { copyTextToClipboard } from "./clipboard";
 
@@ -26,14 +26,14 @@ const CopyLinkButton: React.FC<{
   }, [buttonState]);
 
   return (
-    <WeaverLink
+    <TendiflowLink
       href={linkPathname}
       rel="noopener noreferrer"
       onClick={handleClick}
       className="copy-sonner-link text-xs font-medium"
     >
       {buttonState === "copy" ? "Copy Link" : "Copied!"}
-    </WeaverLink>
+    </TendiflowLink>
   );
 };
 
@@ -105,13 +105,13 @@ export const notify = ({
       <div className="flex flex-col items-start justify-start space-y-2">
         <span className="text-sm text-gray-900">{message}</span>
         <div className="flex flex-row items-center justify-start space-x-2">
-          <WeaverLink
+          <TendiflowLink
             href={linkPathname}
             rel="noopener noreferrer"
             className="text-xs font-medium"
           >
             {linkLabel}
-          </WeaverLink>
+          </TendiflowLink>
           <span className="text-xs text-gray-400">•</span>
           <CopyLinkButton linkPathname={linkPathname} onCopy={handleCopy} />
         </div>

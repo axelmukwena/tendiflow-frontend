@@ -1,6 +1,6 @@
 import { FC, Fragment, ReactNode } from "react";
 
-import { getCurrentUserServerSide } from "@/api/services/weaver/profile/fetchers";
+import { getCurrentUserServerSide } from "@/api/services/tendiflow/profile/fetchers";
 import { Toaster } from "@/components/toaster";
 import { CurrentOrganisationContextProvider } from "@/contexts/current-organisation";
 import { CurrentUserContextProvider } from "@/contexts/current-user";

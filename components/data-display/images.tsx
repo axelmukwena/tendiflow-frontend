@@ -1,17 +1,17 @@
 import { ExternalLink, Eye, Image as ImageIcon } from "lucide-react";
 import { FC, useState } from "react";
 
-import { WeaverFile, WeaverMimeType } from "@/api/services/weaver/types/file";
+import { TendiflowFile, TendiflowMimeType } from "@/api/services/tendiflow/types/file";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { getGoogleStorageFileUrl } from "@/utilities/helpers/file-storage";
 
-import { WeaverLink } from "../common/weaver-link";
+import { TendiflowLink } from "../common/tendiflow-link";
 import { DataDisplayRow } from "./row";
 
 interface ImagesDisplayRowProps {
   label: string;
-  images?: WeaverFile[] | null;
+  images?: TendiflowFile[] | null;
   caption?: string | null;
   className?: string;
   maxImages?: number;
@@ -20,16 +20,16 @@ interface ImagesDisplayRowProps {
 }
 
 // Helper function to check if file is an image
-const isImageFile = (mimeType: WeaverMimeType): boolean => {
+const isImageFile = (mimeType: TendiflowMimeType): boolean => {
   const imageMimeTypes = [
-    WeaverMimeType.PNG,
-    WeaverMimeType.JPG,
-    WeaverMimeType.GIF,
-    WeaverMimeType.WEBP,
-    WeaverMimeType.TIFF,
-    WeaverMimeType.SVG,
-    WeaverMimeType.ICON,
-    WeaverMimeType.BMP,
+    TendiflowMimeType.PNG,
+    TendiflowMimeType.JPG,
+    TendiflowMimeType.GIF,
+    TendiflowMimeType.WEBP,
+    TendiflowMimeType.TIFF,
+    TendiflowMimeType.SVG,
+    TendiflowMimeType.ICON,
+    TendiflowMimeType.BMP,
   ];
   return imageMimeTypes.includes(mimeType);
 };
@@ -52,7 +52,7 @@ export const ImagesDisplayRow: FC<ImagesDisplayRowProps> = ({
   gridCols = 3,
   showMetadata = true,
 }) => {
-  const [selectedImage, setSelectedImage] = useState<WeaverFile | null>(null);
+  const [selectedImage, setSelectedImage] = useState<TendiflowFile | null>(null);
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(
     new Set(),
   );
@@ -144,7 +144,7 @@ export const ImagesDisplayRow: FC<ImagesDisplayRowProps> = ({
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <WeaverLink
+                      <TendiflowLink
                         href={getGoogleStorageFileUrl(image.pathname)}
                         target="_blank"
                       >
@@ -156,7 +156,7 @@ export const ImagesDisplayRow: FC<ImagesDisplayRowProps> = ({
                         >
                           <ExternalLink className="w-3 h-3" />
                         </Button>
-                      </WeaverLink>
+                      </TendiflowLink>
                     </div>
                   </div>
 

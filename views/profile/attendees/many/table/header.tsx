@@ -1,7 +1,7 @@
 import { FC } from "react";
 
-import { AttendeeSortBy } from "@/api/services/weaver/attendees/types";
-import { OrderBy } from "@/api/services/weaver/types/general";
+import { AttendeeSortBy } from "@/api/services/tendiflow/attendees/types";
+import { OrderBy } from "@/api/services/tendiflow/types/general";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface AttendeeTableHeaderProps {

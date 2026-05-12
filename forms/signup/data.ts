@@ -1,4 +1,4 @@
-import { SignupRequestClient } from "@/api/services/weaver/oauth/types";
+import { SignupRequestClient } from "@/api/services/tendiflow/oauth/types";
 
 import { LoadSignupCreateData } from "./types";
 

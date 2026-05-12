@@ -1,4 +1,4 @@
-import { OrderBy } from "@/api/services/weaver/types/general";
+import { OrderBy } from "@/api/services/tendiflow/types/general";
 import { QueryParamKey, SelectOptionType } from "@/types/general";
 import { PAGE_LIMIT_OPTIONS } from "@/utilities/constants/options";
 

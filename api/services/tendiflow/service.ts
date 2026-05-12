@@ -4,7 +4,7 @@ import { HeaderRequest } from "./types/general";
 /**
  * API service that requires authentication token
  */
-export class WeaverApiService extends BaseApiService {
+export class TendiflowApiService extends BaseApiService {
   private readonly token: string;
   constructor(token: string, headers?: HeaderRequest) {
     if (!token) {

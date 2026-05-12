@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { MeetingNoTokenService } from "@/api/services/weaver/meetings/notoken.service";
+import { MeetingNoTokenService } from "@/api/services/tendiflow/meetings/notoken.service";
 import { getHeadersNextRequest } from "@/api/utilities";
 import { verifyCsrfToken } from "@/utilities/helpers/csrf";
 import { getErrorMessage } from "@/utilities/helpers/errors";

@@ -1,5 +1,5 @@
 import { OrganisationRelationship } from "../organisations/types";
-import { WeaverMimeType } from "../types/file";
+import { TendiflowMimeType } from "../types/file";
 import {
   BasicApiResponse,
   DatabaseStatus,
@@ -66,7 +66,7 @@ export enum ApiActionMeeting {
 }
 
 // Base interfaces
-export interface WeaverFile {
+export interface TendiflowFile {
   id: string;
   created_at: string;
   updated_at: string | null;
@@ -75,7 +75,7 @@ export interface WeaverFile {
   blob_name: string;
   name: string;
   pathname: string;
-  mime_type: WeaverMimeType;
+  mime_type: TendiflowMimeType;
   size_bytes: number;
   position: number;
   notes: string | null;
@@ -147,16 +147,16 @@ export interface MeetingBase {
 }
 
 export interface MeetingQrcode {
-  qrcode: WeaverFile | null;
+  qrcode: TendiflowFile | null;
   check_in_url: string | null;
 }
 
 export interface MeetingImage {
-  image: WeaverFile | null;
+  image: TendiflowFile | null;
 }
 
 export interface MeetingAttachments {
-  attachments: WeaverFile[] | null;
+  attachments: TendiflowFile[] | null;
 }
 
 export interface MeetingRelatives {

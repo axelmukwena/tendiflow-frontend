@@ -5,8 +5,8 @@ import { FC } from "react";
 import {
   Attendee,
   AttendeeSortBy,
-} from "@/api/services/weaver/attendees/types";
-import { OrderBy } from "@/api/services/weaver/types/general";
+} from "@/api/services/tendiflow/attendees/types";
+import { OrderBy } from "@/api/services/tendiflow/types/general";
 import { TablePagination } from "@/components/pagination/table";
 import { useAttendeeUsersMany } from "@/hooks/profile/attendee/many";
 import { useAttendeeUserPagination } from "@/hooks/profile/attendee/pagination";

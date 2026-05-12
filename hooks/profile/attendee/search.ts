@@ -5,11 +5,11 @@ import {
   Attendee,
   AttendeeParams,
   AttendeeQuery,
-} from "@/api/services/weaver/attendees/types";
-import { getManyAttendeeUserFetcher } from "@/api/services/weaver/profile/fetchers";
-import { ApiActionProfile } from "@/api/services/weaver/profile/types";
-import { getProfileSwrUrlV1 } from "@/api/services/weaver/profile/utilities";
-import { DataServiceResponse } from "@/api/services/weaver/types/general";
+} from "@/api/services/tendiflow/attendees/types";
+import { getManyAttendeeUserFetcher } from "@/api/services/tendiflow/profile/fetchers";
+import { ApiActionProfile } from "@/api/services/tendiflow/profile/types";
+import { getProfileSwrUrlV1 } from "@/api/services/tendiflow/profile/utilities";
+import { DataServiceResponse } from "@/api/services/tendiflow/types/general";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
 import { useUserCredentials } from "../credentials";

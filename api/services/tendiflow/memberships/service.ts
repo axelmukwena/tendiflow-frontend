@@ -2,7 +2,7 @@ import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { HeaderKey } from "@/utilities/helpers/enums";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverApiService } from "../service";
+import { TendiflowApiService } from "../service";
 import { BasicApiResponse, DataServiceResponse } from "../types/general";
 import {
   ApiActionMembership,
@@ -27,7 +27,7 @@ import { getMembershipApiUrlV1 } from "./utilities";
 /**
  * Service for membership management endpoints (requires authentication)
  */
-export class MembershipService extends WeaverApiService {
+export class MembershipService extends TendiflowApiService {
   /**
    * Get many memberships with filtering, sorting, and pagination
    * @param {GetManyFilteredMembershipsProps} props - The organisation ID, query and parameters

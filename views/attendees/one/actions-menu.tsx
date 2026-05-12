@@ -1,8 +1,8 @@
 import { Archive, EllipsisVertical, PenBox, Trash } from "lucide-react";
 import { Fragment, useState } from "react";
 
-import { Attendee } from "@/api/services/weaver/attendees/types";
-import { DatabaseStatus } from "@/api/services/weaver/types/general";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
+import { DatabaseStatus } from "@/api/services/tendiflow/types/general";
 import { ActionAlertDialog, ActionType } from "@/components/dialogs/action";
 import { EntityDialog } from "@/components/dialogs/entity";
 import { Button } from "@/components/ui/button";

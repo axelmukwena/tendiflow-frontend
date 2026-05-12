@@ -12,7 +12,7 @@ import {
   GetAttendeeUserStatisticsProps,
   GetAttendeeUserStatisticsResponseApi,
 } from "../attendees/types";
-import { WeaverApiService } from "../service";
+import { TendiflowApiService } from "../service";
 import { DataServiceResponse } from "../types/general";
 import { User } from "../users/types";
 import {
@@ -29,7 +29,7 @@ import { getProfileApiUrlV1 } from "./utilities";
 /**
  * Service for profile management endpoints (requires authentication)
  */
-export class ProfileService extends WeaverApiService {
+export class ProfileService extends TendiflowApiService {
   /**
    * Get current user profile
    * @returns {Promise<DataServiceResponse<User | null>>} The user profile response

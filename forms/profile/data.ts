@@ -1,5 +1,5 @@
-import { EmailVerificationConfirm } from "@/api/services/weaver/profile/types";
-import { UserUpdate } from "@/api/services/weaver/users/types";
+import { EmailVerificationConfirm } from "@/api/services/tendiflow/profile/types";
+import { UserUpdate } from "@/api/services/tendiflow/users/types";
 
 import { ProfileFormSchema } from "./schema";
 import { LoadEmailVerificationConfirmCreateData } from "./types";

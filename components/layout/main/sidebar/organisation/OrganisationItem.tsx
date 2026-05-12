@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 
-import { Organisation } from "@/api/services/weaver/organisations/types";
+import { Organisation } from "@/api/services/tendiflow/organisations/types";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
 import { ClientPathname } from "@/types/paths";

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { AttendeeNoTokenService } from "@/api/services/weaver/attendees/notoken.service";
-import { AttendeeUpdateGuest } from "@/api/services/weaver/attendees/types";
+import { AttendeeNoTokenService } from "@/api/services/tendiflow/attendees/notoken.service";
+import { AttendeeUpdateGuest } from "@/api/services/tendiflow/attendees/types";
 import { getHeadersNextRequest } from "@/api/utilities";
 import { verifyCsrfToken } from "@/utilities/helpers/csrf";
 import { getErrorMessage } from "@/utilities/helpers/errors";

@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { WeaverLink } from "../common/weaver-link";
+import { TendiflowLink } from "../common/tendiflow-link";
 import { DataDisplayRow } from "./row";
 
 interface PhonenumberDisplayRowProps {
@@ -20,12 +20,12 @@ export const PhonenumberDisplayRow: FC<PhonenumberDisplayRowProps> = ({
   return (
     <DataDisplayRow label={label} caption={caption} className={className}>
       {value && (
-        <WeaverLink
+        <TendiflowLink
           href={`tel:${value}`}
           className="inline-flex items-center space-x-2"
         >
           <span>{value}</span>
-        </WeaverLink>
+        </TendiflowLink>
       )}
     </DataDisplayRow>
   );

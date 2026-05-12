@@ -1,7 +1,7 @@
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { FC } from "react";
 
-import { Attendee } from "@/api/services/weaver/attendees/types";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 

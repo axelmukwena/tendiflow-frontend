@@ -2,13 +2,13 @@
 
 import useSWR, { useSWRConfig } from "swr";
 
-import { getOrganisationStatisticsFetcher } from "@/api/services/weaver/organisations/fetchers";
+import { getOrganisationStatisticsFetcher } from "@/api/services/tendiflow/organisations/fetchers";
 import {
   ApiActionOrganisation,
   OrganisationStatisticsResponse,
   UseOrganisationStatistics,
-} from "@/api/services/weaver/organisations/types";
-import { getOrganisationSwrUrlV1 } from "@/api/services/weaver/organisations/utilities";
+} from "@/api/services/tendiflow/organisations/types";
+import { getOrganisationSwrUrlV1 } from "@/api/services/tendiflow/organisations/utilities";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
 import { useUserCredentials } from "../profile/credentials";

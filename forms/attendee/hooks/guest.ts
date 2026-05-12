@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Attendee } from "@/api/services/weaver/attendees/types";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
 import { useGuestAttendee } from "@/hooks/attendees/guest";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 import { notify } from "@/utilities/helpers/toaster";

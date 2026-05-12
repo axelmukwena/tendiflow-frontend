@@ -3,13 +3,13 @@ import { FC } from "react";
 
 import { mergeTailwind } from "@/utilities/helpers/tailwind";
 
-interface WeaverLinkProps
+interface TendiflowLinkProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
   className?: string;
 }
 
-export const WeaverLink: FC<WeaverLinkProps> = ({
+export const TendiflowLink: FC<TendiflowLinkProps> = ({
   children,
   href,
   className = "",

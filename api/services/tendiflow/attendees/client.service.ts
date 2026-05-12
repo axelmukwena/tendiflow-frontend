@@ -5,8 +5,8 @@ import {
   CancelGuestAttendanceClientProps,
   GetGuestAttendeeClientProps,
   UpdateGuestAttendeeClientProps,
-} from "@/api/services/weaver/attendees/types";
-import { DataServiceResponse } from "@/api/services/weaver/types/general";
+} from "@/api/services/tendiflow/attendees/types";
+import { DataServiceResponse } from "@/api/services/tendiflow/types/general";
 import { HeaderKey } from "@/utilities/helpers/enums";
 
 import { getCsrfToken } from "../oauth/fetchers";

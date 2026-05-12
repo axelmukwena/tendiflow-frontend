@@ -8,7 +8,7 @@ import { HeaderRequest } from "./types/general";
  * Forwards the server-side API_KEY in the X-API-Key header so the backend can
  * gate public/guest endpoints to requests originating from our Next.js layer.
  */
-export class WeaverNoTokenApiService extends BaseApiService {
+export class TendiflowNoTokenApiService extends BaseApiService {
   constructor(headers?: HeaderRequest) {
     super({
       headers: {

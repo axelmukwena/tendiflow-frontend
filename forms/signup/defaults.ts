@@ -1,6 +1,6 @@
 import { DefaultValues } from "react-hook-form";
 
-import { Language } from "@/api/services/weaver/types/general";
+import { Language } from "@/api/services/tendiflow/types/general";
 
 import { SignupFormSchema } from "./schema";
 

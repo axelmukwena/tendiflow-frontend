@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import { getAttendeesAllFetcher } from "@/api/services/weaver/attendees/fetchers";
+import { getAttendeesAllFetcher } from "@/api/services/tendiflow/attendees/fetchers";
 import {
   AttendeeQuery,
   AttendeeSortBy,
-} from "@/api/services/weaver/attendees/types";
-import { Meeting } from "@/api/services/weaver/meetings/types";
-import { DatabaseStatus, OrderBy } from "@/api/services/weaver/types/general";
+} from "@/api/services/tendiflow/attendees/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
+import { DatabaseStatus, OrderBy } from "@/api/services/tendiflow/types/general";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
 import {
   exportMeetingToExcel,

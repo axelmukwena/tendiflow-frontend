@@ -4,7 +4,7 @@ import {
   OrganisationIndustry,
   OrganisationSettingsDateFormat,
   OrganisationSettingsTimeFormat,
-} from "@/api/services/weaver/organisations/types";
+} from "@/api/services/tendiflow/organisations/types";
 
 import { OrganisationFormSchema } from "./schema";
 import { OrganisationFormDefaultValuesProps } from "./types";

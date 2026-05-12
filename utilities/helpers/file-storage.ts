@@ -1,4 +1,4 @@
-import { WeaverMimeType } from "@/api/services/weaver/types/file";
+import { TendiflowMimeType } from "@/api/services/tendiflow/types/file";
 
 import { STORAGE_HEADERS } from "../constants/general";
 import { StorageHeader } from "./enums";
@@ -8,14 +8,14 @@ import { StorageHeader } from "./enums";
  * @param {File} file - The file to get the MIME type of.
  * @returns {MimeType | null} The MIME type of the file, or null if it is not recognised.
  */
-export const getMimeType = (file: File | null): WeaverMimeType | null => {
+export const getMimeType = (file: File | null): TendiflowMimeType | null => {
   if (!file) {
     return null;
   }
   const mimeType = file.type;
-  const values = Object.values(WeaverMimeType);
-  if (values.includes(mimeType as WeaverMimeType)) {
-    return mimeType as WeaverMimeType;
+  const values = Object.values(TendiflowMimeType);
+  if (values.includes(mimeType as TendiflowMimeType)) {
+    return mimeType as TendiflowMimeType;
   }
   return null;
 };
@@ -24,10 +24,10 @@ export const getMimeType = (file: File | null): WeaverMimeType | null => {
  * Gets the MIME types of multiple files.
  *
  * @param {File[]} files - The files to get the MIME types of.
- * @returns {WeaverMimeType[]} The MIME types of the files.
+ * @returns {TendiflowMimeType[]} The MIME types of the files.
  */
-export const getMimeTypes = (files: File[]): WeaverMimeType[] => {
-  const mimes: WeaverMimeType[] = [];
+export const getMimeTypes = (files: File[]): TendiflowMimeType[] => {
+  const mimes: TendiflowMimeType[] = [];
   for (const file of files) {
     const mimeType = getMimeType(file);
     if (mimeType) {

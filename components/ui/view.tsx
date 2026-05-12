@@ -6,7 +6,7 @@ import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 import { mergeTailwind } from "@/utilities/helpers/tailwind";
 import { getMultilineText } from "@/utilities/helpers/text";
 
-import { WeaverLink } from "../common/weaver-link";
+import { TendiflowLink } from "../common/tendiflow-link";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 
 export const LeftSectionContainer = ({
@@ -249,9 +249,9 @@ export const LinkFieldView: FC<{
     </ViewLabelContainer>
     <ViewValue>
       {href && (
-        <WeaverLink href={href} target="_blank" rel="noopener noreferrer">
+        <TendiflowLink href={href} target="_blank" rel="noopener noreferrer">
           {name || href}
-        </WeaverLink>
+        </TendiflowLink>
       )}
       {!href && <EmptyRenderer />}
     </ViewValue>
@@ -275,9 +275,9 @@ export const UserFieldView: FC<{
     <ViewValue>
       <div className="flex flex-col">
         {userId && (
-          <WeaverLink href={`/users/${userId}`}>
+          <TendiflowLink href={`/users/${userId}`}>
             {firstName} {lastName}
-          </WeaverLink>
+          </TendiflowLink>
         )}
         {!userId && <EmptyRenderer />}
         {timestamp && (

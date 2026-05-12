@@ -1,7 +1,7 @@
 import { FormEvent, KeyboardEvent } from "react";
 import { FieldErrors, UseFormReturn } from "react-hook-form";
 
-import { User } from "@/api/services/weaver/users/types";
+import { User } from "@/api/services/tendiflow/users/types";
 
 import {
   EmailVerificationConfirmFormSchema,

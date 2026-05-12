@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { AttendanceStatus } from "@/api/services/weaver/attendees/types";
-import { CustomFieldType } from "@/api/services/weaver/meetings/types";
+import { AttendanceStatus } from "@/api/services/tendiflow/attendees/types";
+import { CustomFieldType } from "@/api/services/tendiflow/meetings/types";
 
 import { PHONE_NUMBER_OPTIONAL_SCHEMA } from "../phonenumber";
 

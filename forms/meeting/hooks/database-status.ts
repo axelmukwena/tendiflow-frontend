@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-import { MeetingService } from "@/api/services/weaver/meetings/service";
-import { Meeting } from "@/api/services/weaver/meetings/types";
-import { DatabaseStatus } from "@/api/services/weaver/types/general";
+import { MeetingService } from "@/api/services/tendiflow/meetings/service";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
+import { DatabaseStatus } from "@/api/services/tendiflow/types/general";
 import { useUserCredentials } from "@/hooks/profile/credentials";
 import { notify } from "@/utilities/helpers/toaster";
 

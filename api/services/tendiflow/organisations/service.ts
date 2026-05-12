@@ -2,7 +2,7 @@ import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { HeaderKey } from "@/utilities/helpers/enums";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverApiService } from "../service";
+import { TendiflowApiService } from "../service";
 import { BasicApiResponse, DataServiceResponse } from "../types/general";
 import {
   ApiActionOrganisation,
@@ -28,7 +28,7 @@ import { getOrganisationApiUrlV1 } from "./utilities";
 /**
  * Service for organisation management endpoints (requires authentication)
  */
-export class OrganisationService extends WeaverApiService {
+export class OrganisationService extends TendiflowApiService {
   /**
    * Get many organisations with filtering, sorting, and pagination
    * @param {GetManyFilteredOrganisationsProps} props - The query and parameters

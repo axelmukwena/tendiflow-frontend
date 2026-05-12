@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { Attendee } from "@/api/services/weaver/attendees/types";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
 import { DataTable } from "@/components/datagrid/data-table";
 
 import { AttendeeColumns } from "./columns";

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
-import { getMeetingsFetcher } from "@/api/services/weaver/meetings/fetchers";
+import { getMeetingsFetcher } from "@/api/services/tendiflow/meetings/fetchers";
 import {
   ApiActionMeeting,
   Meeting,
@@ -9,9 +9,9 @@ import {
   MeetingQuery,
   MeetingsManyResponse,
   MeetingSortBy,
-} from "@/api/services/weaver/meetings/types";
-import { getMeetingSwrUrlV1 } from "@/api/services/weaver/meetings/utilities";
-import { DatabaseStatus, OrderBy } from "@/api/services/weaver/types/general";
+} from "@/api/services/tendiflow/meetings/types";
+import { getMeetingSwrUrlV1 } from "@/api/services/tendiflow/meetings/utilities";
+import { DatabaseStatus, OrderBy } from "@/api/services/tendiflow/types/general";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 import { notify } from "@/utilities/helpers/toaster";

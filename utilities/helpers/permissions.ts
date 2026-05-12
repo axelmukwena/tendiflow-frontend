@@ -1,5 +1,5 @@
-import { DatabaseStatus } from "@/api/services/weaver/types/general";
-import { UserStatus } from "@/api/services/weaver/users/types";
+import { DatabaseStatus } from "@/api/services/tendiflow/types/general";
+import { UserStatus } from "@/api/services/tendiflow/users/types";
 
 /**
  * Check if the existing record is active.

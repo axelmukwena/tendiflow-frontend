@@ -2,7 +2,7 @@ import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { HeaderKey } from "@/utilities/helpers/enums";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverApiService } from "../service";
+import { TendiflowApiService } from "../service";
 import { BasicApiResponse, DataServiceResponse } from "../types/general";
 import {
   ApiActionMeeting,
@@ -32,7 +32,7 @@ import { getMeetingApiUrlV1 } from "./utilities";
 /**
  * Service for meeting management endpoints (requires authentication)
  */
-export class MeetingService extends WeaverApiService {
+export class MeetingService extends TendiflowApiService {
   /**
    * Get many meetings with filtering, sorting, and pagination
    * @param {GetManyFilteredMeetingsProps} props - The organisation ID, query and parameters

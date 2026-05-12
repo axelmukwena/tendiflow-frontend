@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { UserKind, UserStatus } from "@/api/services/weaver/users/types";
+import { UserKind, UserStatus } from "@/api/services/tendiflow/users/types";
 import { BadgeDisplayRow } from "@/components/data-display/badge";
 import { DataDisplayContainer } from "@/components/data-display/container";
 import { EmailDisplayRow } from "@/components/data-display/email";

@@ -2,7 +2,7 @@
 
 import { FC, Fragment } from "react";
 
-import { Attendee } from "@/api/services/weaver/attendees/types";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
 import { TextField } from "@/components/inputs/text";
 import { Spinner } from "@/components/loaders/spinner";
 import { Button } from "@/components/ui/button";

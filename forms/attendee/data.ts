@@ -4,7 +4,7 @@ import {
   AttendeeCreateGuestClient,
   AttendeeFeedbackCreateClient,
   AttendeeUpdateGuestClient,
-} from "@/api/services/weaver/attendees/types";
+} from "@/api/services/tendiflow/attendees/types";
 
 import { AttendeeFormSchema } from "./schema";
 

@@ -4,7 +4,7 @@ import {
   OrganisationIndustry,
   OrganisationSettingsDateFormat,
   OrganisationSettingsTimeFormat,
-} from "@/api/services/weaver/organisations/types";
+} from "@/api/services/tendiflow/organisations/types";
 
 import { PHONE_NUMBER_OPTIONAL_SCHEMA } from "../phonenumber";
 import { URL_OPTIONAL_FORM_SCHEMA } from "../url";

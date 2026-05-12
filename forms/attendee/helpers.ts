@@ -1,5 +1,5 @@
-import { AttendeeCheckinLocation } from "@/api/services/weaver/attendees/types";
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { AttendeeCheckinLocation } from "@/api/services/tendiflow/attendees/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 
 export interface CheckinValidationResult {

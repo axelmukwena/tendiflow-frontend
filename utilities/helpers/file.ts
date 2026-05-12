@@ -1,4 +1,4 @@
-import { WeaverMimeType } from "@/api/services/weaver/types/file";
+import { TendiflowMimeType } from "@/api/services/tendiflow/types/file";
 import { Orientation } from "@/types/general";
 
 /**
@@ -193,7 +193,7 @@ export async function getRotatedImage(
         throw new Error("Canvas is empty");
       }
       resolve(URL.createObjectURL(file));
-    }, WeaverMimeType.JPG);
+    }, TendiflowMimeType.JPG);
   });
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { OauthService } from "@/api/services/weaver/oauth/service";
-import { SignupRequest } from "@/api/services/weaver/oauth/types";
+import { OauthService } from "@/api/services/tendiflow/oauth/service";
+import { SignupRequest } from "@/api/services/tendiflow/oauth/types";
 import { getHeadersNextRequest } from "@/api/utilities";
 import { verifyCsrfToken } from "@/utilities/helpers/csrf";
 import { getErrorMessage } from "@/utilities/helpers/errors";

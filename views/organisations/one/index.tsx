@@ -2,7 +2,7 @@
 
 import { FC, Fragment } from "react";
 
-import { Organisation } from "@/api/services/weaver/organisations/types";
+import { Organisation } from "@/api/services/tendiflow/organisations/types";
 
 import { OrganisationHeader } from "./header";
 import { OrganisationPageContent } from "./view";

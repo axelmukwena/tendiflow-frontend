@@ -17,7 +17,7 @@ import { FC, useEffect, useState } from "react";
 import {
   AttendeeCheckinDevice,
   AttendeeCheckinLocation,
-} from "@/api/services/weaver/attendees/types";
+} from "@/api/services/tendiflow/attendees/types";
 import { Spinner } from "@/components/loaders/spinner";
 import { LogoVertical } from "@/components/logos/vertical";
 import {

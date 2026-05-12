@@ -2,13 +2,13 @@
 
 import useSWR, { useSWRConfig } from "swr";
 
-import { getOrganisationByIdFetcher } from "@/api/services/weaver/organisations/fetchers";
+import { getOrganisationByIdFetcher } from "@/api/services/tendiflow/organisations/fetchers";
 import {
   ApiActionOrganisation,
   Organisation,
   UseCurrentOrganisation,
-} from "@/api/services/weaver/organisations/types";
-import { getOrganisationApiUrlV1 } from "@/api/services/weaver/organisations/utilities";
+} from "@/api/services/tendiflow/organisations/types";
+import { getOrganisationApiUrlV1 } from "@/api/services/tendiflow/organisations/utilities";
 import { useCurrentUserContext } from "@/contexts/current-user";
 import { LocalStorageKey } from "@/storage/local/enum";
 import { setLocalStorageItem } from "@/storage/local/storage";

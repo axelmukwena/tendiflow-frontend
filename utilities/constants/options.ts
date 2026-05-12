@@ -1,16 +1,16 @@
-import { AttendanceStatus } from "@/api/services/weaver/attendees/types";
+import { AttendanceStatus } from "@/api/services/tendiflow/attendees/types";
 import {
   MembershipAdminStatus,
   MembershipInviteeStatus,
   MembershipStatus,
-} from "@/api/services/weaver/memberships/types";
+} from "@/api/services/tendiflow/memberships/types";
 import {
   OrganisationSettingsDateFormat,
   OrganisationSettingsTimeFormat,
-} from "@/api/services/weaver/organisations/types";
-import { WeaverMimeType } from "@/api/services/weaver/types/file";
-import { DatabaseStatus, Language } from "@/api/services/weaver/types/general";
-import { UserStatus } from "@/api/services/weaver/users/types";
+} from "@/api/services/tendiflow/organisations/types";
+import { TendiflowMimeType } from "@/api/services/tendiflow/types/file";
+import { DatabaseStatus, Language } from "@/api/services/tendiflow/types/general";
+import { UserStatus } from "@/api/services/tendiflow/users/types";
 import { BoolString, SelectOptionType } from "@/types/general";
 
 export const PAGE_LIMIT_OPTIONS: SelectOptionType[] = [
@@ -87,11 +87,11 @@ export const DATABASE_STATUS_OPTIONS: SelectOptionType[] = [
 ];
 
 export const ACCEPT_IMAGE_FILE_OPTIONS: SelectOptionType[] = [
-  { name: "jpg", value: WeaverMimeType.JPG, color: "green" },
-  { name: "jpeg", value: WeaverMimeType.JPG, color: "blue" },
-  { name: "png", value: WeaverMimeType.PNG, color: "orange" },
-  { name: "gif", value: WeaverMimeType.GIF, color: "red" },
-  { name: "svg", value: WeaverMimeType.SVG, color: "purple" },
+  { name: "jpg", value: TendiflowMimeType.JPG, color: "green" },
+  { name: "jpeg", value: TendiflowMimeType.JPG, color: "blue" },
+  { name: "png", value: TendiflowMimeType.PNG, color: "orange" },
+  { name: "gif", value: TendiflowMimeType.GIF, color: "red" },
+  { name: "svg", value: TendiflowMimeType.SVG, color: "purple" },
 ];
 
 export const ORGANISATION_DATE_FORMAT_OPTIONS: SelectOptionType[] = [

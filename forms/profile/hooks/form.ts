@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { User } from "@/api/services/weaver/users/types";
+import { User } from "@/api/services/tendiflow/users/types";
 import { getFormErrorMessages } from "@/forms/general";
 
 import { profileDefaultValues } from "../defaults";

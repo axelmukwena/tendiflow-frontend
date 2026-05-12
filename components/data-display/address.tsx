@@ -1,7 +1,7 @@
 import { MapPinIcon } from "lucide-react";
 import { FC } from "react";
 
-import { WeaverLink } from "../common/weaver-link";
+import { TendiflowLink } from "../common/tendiflow-link";
 import { DataDisplayRow } from "./row";
 
 interface Address {
@@ -56,14 +56,14 @@ export const AddressDisplayRow: FC<AddressDisplayRowProps> = ({
           <span className="text-sm">
             {addressString} (
             {showMapLink && (
-              <WeaverLink
+              <TendiflowLink
                 href={mapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center text-xs"
               >
                 View on Maps
-              </WeaverLink>
+              </TendiflowLink>
             )}
             )
           </span>

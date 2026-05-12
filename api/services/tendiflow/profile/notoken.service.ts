@@ -1,7 +1,7 @@
 import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverNoTokenApiService } from "../notoken.service";
+import { TendiflowNoTokenApiService } from "../notoken.service";
 import { DataServiceResponse } from "../types/general";
 import {
   ApiActionProfile,
@@ -20,7 +20,7 @@ import { getProfileApiUrlV1 } from "./utilities";
 /**
  * Profile service for endpoints that don't require authentication
  */
-export class ProfileNoTokenService extends WeaverNoTokenApiService {
+export class ProfileNoTokenService extends TendiflowNoTokenApiService {
   /**
    * Request email verification
    * @param {EmailVerificationRequestProps} props - The email verification request data

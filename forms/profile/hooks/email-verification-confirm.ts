@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormEvent, KeyboardEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { requestEmailVerification } from "@/api/services/weaver/profile/fetchers";
-import { ProfileNoTokenService } from "@/api/services/weaver/profile/notoken.service";
+import { requestEmailVerification } from "@/api/services/tendiflow/profile/fetchers";
+import { ProfileNoTokenService } from "@/api/services/tendiflow/profile/notoken.service";
 import { useCurrentUserContext } from "@/contexts/current-user";
 import { getFormErrorMessages } from "@/forms/general";
 import { usePreviousPathname } from "@/hooks/utilities/previous-pathname";

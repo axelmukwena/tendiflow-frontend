@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import {
   Breadcrumb,
   BreadcrumbItem,

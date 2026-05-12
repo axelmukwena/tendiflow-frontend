@@ -4,8 +4,8 @@ import { ReactNode } from "react";
 import {
   AttendanceStatus,
   Attendee,
-} from "@/api/services/weaver/attendees/types";
-import { WeaverLink } from "@/components/common/weaver-link";
+} from "@/api/services/tendiflow/attendees/types";
+import { TendiflowLink } from "@/components/common/tendiflow-link";
 import { DataTableColumn } from "@/components/datagrid/data-table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -77,12 +77,12 @@ export const AttendeeColumns = (
     name: "Attendee",
     width: 250,
     renderCell: ({ row }): ReactNode => (
-      <WeaverLink
+      <TendiflowLink
         href={`/meetings/${row.meeting_id}?tab=attendee&attendeeId=${row.id}`}
         className="font-medium text-sm text-gray-900 hover:text-blue-600 transition-colors"
       >
         {row.first_name} {row.last_name}
-      </WeaverLink>
+      </TendiflowLink>
     ),
   },
   {
@@ -151,12 +151,12 @@ export const AttendeeColumns = (
       }
       return (
         <div className="space-y-1">
-          <WeaverLink
+          <TendiflowLink
             href={`/meetings/${row.meeting_id}`}
             className="text-sm text-blue-600 hover:text-blue-800 truncate block"
           >
             {row.meeting.title}
-          </WeaverLink>
+          </TendiflowLink>
           {row.meeting.start_datetime && (
             <div className="flex items-center text-xs text-gray-500">
               <Calendar className="w-3 h-3 mr-1 text-gray-400" />

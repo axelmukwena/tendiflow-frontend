@@ -2,8 +2,8 @@ import { OptionsType, setCookie } from "cookies-next";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { OauthService } from "@/api/services/weaver/oauth/service";
-import { GoogleLoginRequest } from "@/api/services/weaver/oauth/types";
+import { OauthService } from "@/api/services/tendiflow/oauth/service";
+import { GoogleLoginRequest } from "@/api/services/tendiflow/oauth/types";
 import {
   getDomainNextRequestCookie,
   getHeadersNextRequest,

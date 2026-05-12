@@ -5,14 +5,14 @@ import useSWR, { useSWRConfig } from "swr";
 import {
   MembershipPermission,
   MembershipStatus,
-} from "@/api/services/weaver/memberships/types";
-import { currentUserFetcher } from "@/api/services/weaver/profile/fetchers";
+} from "@/api/services/tendiflow/memberships/types";
+import { currentUserFetcher } from "@/api/services/tendiflow/profile/fetchers";
 import {
   ApiActionProfile,
   UseCurrentUser,
-} from "@/api/services/weaver/profile/types";
-import { getProfileApiUrlV1 } from "@/api/services/weaver/profile/utilities";
-import { User } from "@/api/services/weaver/users/types";
+} from "@/api/services/tendiflow/profile/types";
+import { getProfileApiUrlV1 } from "@/api/services/tendiflow/profile/utilities";
+import { User } from "@/api/services/tendiflow/users/types";
 import { LocalStorageKey } from "@/storage/local/enum";
 import {
   getLocalStorageItem,

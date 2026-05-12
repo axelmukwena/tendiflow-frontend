@@ -1,6 +1,6 @@
 import { FC, Fragment } from "react";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { DatePickerField } from "@/components/inputs/datepicker";
 import { SelectField } from "@/components/inputs/select/selectfield";
 import { SwitchField } from "@/components/inputs/switch";

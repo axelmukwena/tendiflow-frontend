@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 
 import { MeetingFormSchema } from "./schema";
 

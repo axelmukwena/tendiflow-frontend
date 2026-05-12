@@ -3,7 +3,7 @@
 import { User as UserIcon } from "lucide-react";
 import { FC } from "react";
 
-import { User } from "@/api/services/weaver/users/types";
+import { User } from "@/api/services/tendiflow/users/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ViewContent,

@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 
-import { Organisation } from "@/api/services/weaver/organisations/types";
+import { Organisation } from "@/api/services/tendiflow/organisations/types";
 import {
   ViewContent,
   ViewPageContent,

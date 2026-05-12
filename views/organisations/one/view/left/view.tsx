@@ -4,7 +4,7 @@ import {
   OrganisationIndustry,
   OrganisationSettingsDateFormat,
   OrganisationSettingsTimeFormat,
-} from "@/api/services/weaver/organisations/types";
+} from "@/api/services/tendiflow/organisations/types";
 import { AddressDisplayRow } from "@/components/data-display/address";
 import { BadgeDisplayRow } from "@/components/data-display/badge";
 import { DataDisplayContainer } from "@/components/data-display/container";

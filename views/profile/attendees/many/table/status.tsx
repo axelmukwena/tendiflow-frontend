@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { AttendanceStatus } from "@/api/services/weaver/attendees/types";
+import { AttendanceStatus } from "@/api/services/tendiflow/attendees/types";
 import { Badge } from "@/components/ui/badge";
 
 interface AttendeeStatusBadgeProps {

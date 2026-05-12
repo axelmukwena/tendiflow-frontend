@@ -1,8 +1,8 @@
 import { Calendar, Clock, MapPin, Tag, Users } from "lucide-react";
 import { ReactNode } from "react";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
-import { WeaverLink } from "@/components/common/weaver-link";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
+import { TendiflowLink } from "@/components/common/tendiflow-link";
 import { DataTableColumn } from "@/components/datagrid/data-table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -69,12 +69,12 @@ export const MeetingColumns = (
     width: 300,
     renderCell: ({ row }): ReactNode => (
       <div className="space-y-1">
-        <WeaverLink
+        <TendiflowLink
           href={`/meetings/${row.id}`}
           className="font-medium text-sm text-gray-900 hover:text-blue-600 transition-colors"
         >
           {row.title}
-        </WeaverLink>
+        </TendiflowLink>
         {row.description && (
           <div className="text-xs text-gray-500 truncate max-w-xs">
             {row.description}

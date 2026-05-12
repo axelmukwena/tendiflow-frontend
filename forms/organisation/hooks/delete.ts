@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { OrganisationService } from "@/api/services/weaver/organisations/service";
-import { Organisation } from "@/api/services/weaver/organisations/types";
+import { OrganisationService } from "@/api/services/tendiflow/organisations/service";
+import { Organisation } from "@/api/services/tendiflow/organisations/types";
 import { useUserCredentials } from "@/hooks/profile/credentials";
 import { notify } from "@/utilities/helpers/toaster";
 

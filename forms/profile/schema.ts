@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Language } from "@/api/services/weaver/types/general";
+import { Language } from "@/api/services/tendiflow/types/general";
 
 import { PASSWORD_SCHEMA } from "../password";
 import { PHONE_NUMBER_OPTIONAL_SCHEMA } from "../phonenumber";

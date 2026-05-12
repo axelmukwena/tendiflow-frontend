@@ -1,8 +1,8 @@
 import { Copy, Download, Expand, ExternalLink, QrCode } from "lucide-react";
 import { FC, useState } from "react";
 
-import { WeaverFile } from "@/api/services/weaver/types/file";
-import { WeaverLink } from "@/components/common/weaver-link";
+import { TendiflowFile } from "@/api/services/tendiflow/types/file";
+import { TendiflowLink } from "@/components/common/tendiflow-link";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,7 +19,7 @@ interface QrCodeDisplayProps {
   label: string;
   caption?: string;
   className?: string;
-  qrcode: WeaverFile;
+  qrcode: TendiflowFile;
   checkInUrl?: string | null;
 }
 
@@ -136,14 +136,14 @@ export const QrCodeDisplay: FC<QrCodeDisplayProps> = ({
             {isFalse && checkInUrl && (
               <div className="pt-2">
                 <h4 className="font-medium text-gray-800">Check-in Link</h4>
-                <WeaverLink
+                <TendiflowLink
                   href={checkInUrl}
                   target="_blank"
                   className="text-sm text-blue-600 underline break-all flex items-center gap-1"
                 >
                   {checkInUrl}
                   <ExternalLink className="size-3" />
-                </WeaverLink>
+                </TendiflowLink>
               </div>
             )}
           </div>

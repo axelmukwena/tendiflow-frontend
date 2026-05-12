@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 
-import { Organisation } from "@/api/services/weaver/organisations/types";
+import { Organisation } from "@/api/services/tendiflow/organisations/types";
 
 import { OrganisationFormSchema } from "./schema";
 

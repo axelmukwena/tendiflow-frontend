@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { WeaverLink } from "../common/weaver-link";
+import { TendiflowLink } from "../common/tendiflow-link";
 import { DataDisplayRow } from "./row";
 
 interface EmailDisplayRowProps {
@@ -19,12 +19,12 @@ export const EmailDisplayRow: FC<EmailDisplayRowProps> = ({
   return (
     <DataDisplayRow label={label} caption={caption} className={className}>
       {value && (
-        <WeaverLink
+        <TendiflowLink
           href={`mailto:${value}`}
           className="inline-flex items-center space-x-2"
         >
           <span className="truncate">{value}</span>
-        </WeaverLink>
+        </TendiflowLink>
       )}
     </DataDisplayRow>
   );

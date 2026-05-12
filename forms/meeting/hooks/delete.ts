@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { MeetingService } from "@/api/services/weaver/meetings/service";
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { MeetingService } from "@/api/services/tendiflow/meetings/service";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { useUserCredentials } from "@/hooks/profile/credentials";
 import { notify } from "@/utilities/helpers/toaster";
 

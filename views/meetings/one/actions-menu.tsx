@@ -8,8 +8,8 @@ import {
 } from "lucide-react";
 import { Fragment, useState } from "react";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
-import { DatabaseStatus } from "@/api/services/weaver/types/general";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
+import { DatabaseStatus } from "@/api/services/tendiflow/types/general";
 import { ActionAlertDialog, ActionType } from "@/components/dialogs/action";
 import { EntityDialog } from "@/components/dialogs/entity";
 import { Button } from "@/components/ui/button";

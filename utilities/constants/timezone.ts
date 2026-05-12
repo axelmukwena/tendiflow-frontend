@@ -1,4 +1,4 @@
-import { TimeZone } from "@/api/services/weaver/types/timezone";
+import { TimeZone } from "@/api/services/tendiflow/types/timezone";
 import { SelectOptionType } from "@/types/general";
 
 export const TIMEZONE_OPTIONS: SelectOptionType[] = [

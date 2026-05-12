@@ -1,7 +1,7 @@
 import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverNoTokenApiService } from "../notoken.service";
+import { TendiflowNoTokenApiService } from "../notoken.service";
 import { DataServiceResponse } from "../types/general";
 import {
   ApiActionAttendee,
@@ -22,7 +22,7 @@ import { getAttendeeApiUrlV1 } from "./utilities";
 /**
  * Service for attendee endpoints that don't require authentication (guest endpoints)
  */
-export class AttendeeNoTokenService extends WeaverNoTokenApiService {
+export class AttendeeNoTokenService extends TendiflowNoTokenApiService {
   /**
    * Guest check-in (register + check-in in one step)
    * @param {GuestCheckinProps} props - The guest check-in data

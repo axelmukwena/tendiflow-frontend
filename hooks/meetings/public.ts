@@ -2,8 +2,8 @@
 
 import useSWR, { useSWRConfig } from "swr";
 
-import { MeetingClientService } from "@/api/services/weaver/meetings/client.service";
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { MeetingClientService } from "@/api/services/tendiflow/meetings/client.service";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
 const service = new MeetingClientService();

@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { DataDisplayContainer } from "@/components/data-display/container";
 import { QrCodeDisplay } from "@/components/data-display/qrcode";
 import { RightSectionContainer } from "@/components/ui/view";

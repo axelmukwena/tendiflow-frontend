@@ -2,7 +2,7 @@ import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { HeaderKey } from "@/utilities/helpers/enums";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverApiService } from "../service";
+import { TendiflowApiService } from "../service";
 import { BasicApiResponse, DataServiceResponse } from "../types/general";
 import {
   ApiActionAttendee,
@@ -29,7 +29,7 @@ import { getAttendeeApiUrlV1 } from "./utilities";
 /**
  * Service for attendee management endpoints (requires authentication)
  */
-export class AttendeeService extends WeaverApiService {
+export class AttendeeService extends TendiflowApiService {
   /**
    * Get many attendees with filtering, sorting, and pagination
    * @param {GetManyFilteredAttendeesProps} props - The organisation ID, meeting ID, query and parameters

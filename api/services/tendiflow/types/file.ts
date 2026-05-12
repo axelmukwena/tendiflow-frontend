@@ -1,4 +1,4 @@
-export enum WeaverMimeType {
+export enum TendiflowMimeType {
   PNG = "image/png",
   GIF = "image/gif",
   JPG = "image/jpeg",
@@ -18,18 +18,18 @@ export enum WeaverMimeType {
   XML = "application/xml",
 }
 
-export interface WeaverFileCreate {
+export interface TendiflowFileCreate {
   blob_name: string;
   name: string;
   pathname: string;
-  mime_type: WeaverMimeType;
+  mime_type: TendiflowMimeType;
   size_bytes: number;
   position: number;
   notes?: string | null;
   file: File;
 }
 
-export interface WeaverFile {
+export interface TendiflowFile {
   id: string;
   created_at: string;
   updated_at: string | null;
@@ -38,7 +38,7 @@ export interface WeaverFile {
   blob_name: string;
   name: string;
   pathname: string;
-  mime_type: WeaverMimeType;
+  mime_type: TendiflowMimeType;
   size_bytes: number;
   position: number;
   notes: string | null;
@@ -48,5 +48,5 @@ export interface SignedUrl {
   signed_url: string;
   blob_name: string;
   pathname: string;
-  mime_type: WeaverMimeType;
+  mime_type: TendiflowMimeType;
 }

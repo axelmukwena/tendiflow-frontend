@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { DataTable } from "@/components/datagrid/data-table";
 
 import { MeetingColumns } from "./columns";

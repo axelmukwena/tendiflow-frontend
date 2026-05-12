@@ -1,7 +1,7 @@
 import {
   AttendeeCheckinDevice,
   AttendeeCheckinLocation,
-} from "@/api/services/weaver/attendees/types";
+} from "@/api/services/tendiflow/attendees/types";
 
 export interface CheckInMetadata {
   locationInfo: AttendeeCheckinLocation;

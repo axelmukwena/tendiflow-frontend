@@ -3,7 +3,7 @@ import {
   MeetingLocationCoordinates,
   MeetingUpdate,
   RecurringUpdateType,
-} from "@/api/services/weaver/meetings/types";
+} from "@/api/services/tendiflow/meetings/types";
 
 import { MeetingFormSchema } from "./schema";
 

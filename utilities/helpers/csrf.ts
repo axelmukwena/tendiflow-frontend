@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { OauthToken } from "@/api/services/weaver/oauth/types";
-import { DataServiceResponse } from "@/api/services/weaver/types/general";
+import { OauthToken } from "@/api/services/tendiflow/oauth/types";
+import { DataServiceResponse } from "@/api/services/tendiflow/types/general";
 import {
   getDomainNextRequestCookie,
   getSeureNextRequestCookie,

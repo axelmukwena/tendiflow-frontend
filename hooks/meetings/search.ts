@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
-import { getMeetingsFetcher } from "@/api/services/weaver/meetings/fetchers";
+import { getMeetingsFetcher } from "@/api/services/tendiflow/meetings/fetchers";
 import {
   ApiActionMeeting,
   Meeting,
   MeetingParams,
   MeetingQuery,
   MeetingsManyResponse,
-} from "@/api/services/weaver/meetings/types";
-import { getMeetingSwrUrlV1 } from "@/api/services/weaver/meetings/utilities";
+} from "@/api/services/tendiflow/meetings/types";
+import { getMeetingSwrUrlV1 } from "@/api/services/tendiflow/meetings/utilities";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 

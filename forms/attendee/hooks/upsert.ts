@@ -2,8 +2,8 @@
 
 import { FormEvent, useState } from "react";
 
-import { AttendeeService } from "@/api/services/weaver/attendees/service";
-import { Attendee } from "@/api/services/weaver/attendees/types";
+import { AttendeeService } from "@/api/services/tendiflow/attendees/service";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
 import { useUserCredentials } from "@/hooks/profile/credentials";
 import { notify } from "@/utilities/helpers/toaster";
 

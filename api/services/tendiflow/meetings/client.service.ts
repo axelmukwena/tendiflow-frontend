@@ -1,5 +1,5 @@
-import { Meeting } from "@/api/services/weaver/meetings/types";
-import { DataServiceResponse } from "@/api/services/weaver/types/general";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
+import { DataServiceResponse } from "@/api/services/tendiflow/types/general";
 import { HeaderKey } from "@/utilities/helpers/enums";
 
 import { getCsrfToken } from "../oauth/fetchers";

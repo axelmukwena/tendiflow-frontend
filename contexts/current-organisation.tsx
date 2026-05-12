@@ -2,7 +2,7 @@
 
 import React, { createContext, FC, ReactNode, useContext } from "react";
 
-import { CurrentOrganisationContextType } from "@/api/services/weaver/organisations/types";
+import { CurrentOrganisationContextType } from "@/api/services/tendiflow/organisations/types";
 import { LinearLoader } from "@/components/loaders/linear";
 import { useCurrentOrganisation } from "@/hooks/organisations/current";
 

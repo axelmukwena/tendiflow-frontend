@@ -3,7 +3,7 @@
 import { FormEvent, KeyboardEvent, useState } from "react";
 import { Control } from "react-hook-form";
 
-import { loginWithEmailPassword } from "@/api/services/weaver/oauth/fetchers";
+import { loginWithEmailPassword } from "@/api/services/tendiflow/oauth/fetchers";
 import { ClientPathname } from "@/types/paths";
 import { notify } from "@/utilities/helpers/toaster";
 

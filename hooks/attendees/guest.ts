@@ -3,13 +3,13 @@
 import { useCallback } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
-import { AttendeeClientService } from "@/api/services/weaver/attendees/client.service";
+import { AttendeeClientService } from "@/api/services/tendiflow/attendees/client.service";
 import {
   Attendee,
   AttendeeCreateGuestClient,
   AttendeeFeedbackCreateClient,
   AttendeeUpdateGuestClient,
-} from "@/api/services/weaver/attendees/types";
+} from "@/api/services/tendiflow/attendees/types";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
 const service = new AttendeeClientService();

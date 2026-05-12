@@ -2,7 +2,7 @@ import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { HeaderKey } from "@/utilities/helpers/enums";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverApiService } from "../service";
+import { TendiflowApiService } from "../service";
 import { BasicApiResponse, DataServiceResponse } from "../types/general";
 import {
   ApiActionUser,
@@ -26,7 +26,7 @@ import { getUserApiUrlV1 } from "./utilities";
 /**
  * Service for user management endpoints (requires authentication)
  */
-export class UserService extends WeaverApiService {
+export class UserService extends TendiflowApiService {
   /**
    * Get many users with filtering, sorting, and pagination
    * @param {GetManyFilteredUsersProps} props - The query and parameters

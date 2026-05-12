@@ -3,8 +3,8 @@ import { FC } from "react";
 import {
   AttendanceStatus,
   Attendee,
-} from "@/api/services/weaver/attendees/types";
-import { CustomFieldType } from "@/api/services/weaver/meetings/types";
+} from "@/api/services/tendiflow/attendees/types";
+import { CustomFieldType } from "@/api/services/tendiflow/meetings/types";
 import { BadgeDisplayRow } from "@/components/data-display/badge";
 import { DataDisplayContainer } from "@/components/data-display/container";
 import { DateDisplayRow } from "@/components/data-display/date";

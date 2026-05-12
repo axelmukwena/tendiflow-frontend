@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { LeftSectionContainer } from "@/components/ui/view";
 
 import { MeetingContentView } from "./view";

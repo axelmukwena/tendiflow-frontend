@@ -4,10 +4,10 @@ import useSWR, { useSWRConfig } from "swr";
 import {
   AttendeeUserStatistics,
   AttendeeUserStatisticsQuery,
-} from "@/api/services/weaver/attendees/types";
-import { getAttendeeUserStatisticsFetcher } from "@/api/services/weaver/profile/fetchers";
-import { ApiActionProfile } from "@/api/services/weaver/profile/types";
-import { getProfileSwrUrlV1 } from "@/api/services/weaver/profile/utilities";
+} from "@/api/services/tendiflow/attendees/types";
+import { getAttendeeUserStatisticsFetcher } from "@/api/services/tendiflow/profile/fetchers";
+import { ApiActionProfile } from "@/api/services/tendiflow/profile/types";
+import { getProfileSwrUrlV1 } from "@/api/services/tendiflow/profile/utilities";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 import { notify } from "@/utilities/helpers/toaster";
 

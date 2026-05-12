@@ -1,7 +1,7 @@
 import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverNoTokenApiService } from "../notoken.service";
+import { TendiflowNoTokenApiService } from "../notoken.service";
 import { DataServiceResponse } from "../types/general";
 import { User } from "../users/types";
 import {
@@ -21,7 +21,7 @@ import { getOauthApiUrlV1 } from "./utilities";
 /**
  * Service for Oauth authentication endpoints
  */
-export class OauthService extends WeaverNoTokenApiService {
+export class OauthService extends TendiflowNoTokenApiService {
   /**
    * Sign up a new user
    * @param {SignupProps} props - The signup data

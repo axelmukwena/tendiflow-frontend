@@ -2,7 +2,7 @@
 
 import { FC, Fragment } from "react";
 
-import { User } from "@/api/services/weaver/users/types";
+import { User } from "@/api/services/tendiflow/users/types";
 
 import { ProfileHeader } from "./header";
 import { ProfilePageContent } from "./view";

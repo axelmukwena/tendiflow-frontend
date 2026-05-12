@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { CustomFieldType, Meeting } from "@/api/services/weaver/meetings/types";
+import { CustomFieldType, Meeting } from "@/api/services/tendiflow/meetings/types";
 import { AddressDisplayRow } from "@/components/data-display/address";
 import { BadgeDisplayRow } from "@/components/data-display/badge";
 import { DataDisplayContainer } from "@/components/data-display/container";

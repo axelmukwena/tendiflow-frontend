@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { ProfileNoTokenService } from "@/api/services/weaver/profile/notoken.service";
-import { EmailVerificationRequest } from "@/api/services/weaver/profile/types";
+import { ProfileNoTokenService } from "@/api/services/tendiflow/profile/notoken.service";
+import { EmailVerificationRequest } from "@/api/services/tendiflow/profile/types";
 import { getHeadersNextRequest } from "@/api/utilities";
 import { verifyCsrfToken } from "@/utilities/helpers/csrf";
 import { getErrorMessage } from "@/utilities/helpers/errors";

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { Meeting } from "@/api/services/weaver/meetings/types";
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
 import { getFormErrorMessages } from "@/forms/general";
 

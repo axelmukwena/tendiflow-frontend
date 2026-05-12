@@ -1,4 +1,4 @@
-import { LoginRequestClient } from "@/api/services/weaver/oauth/types";
+import { LoginRequestClient } from "@/api/services/tendiflow/oauth/types";
 
 import { LoadLoginCreateData } from "./types";
 

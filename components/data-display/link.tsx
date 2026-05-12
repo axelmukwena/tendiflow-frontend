@@ -1,7 +1,7 @@
 import { ExternalLinkIcon } from "lucide-react";
 import { FC } from "react";
 
-import { WeaverLink } from "../common/weaver-link";
+import { TendiflowLink } from "../common/tendiflow-link";
 import { DataDisplayRow } from "./row";
 
 interface LinkDisplayRowProps {
@@ -25,7 +25,7 @@ export const LinkDisplayRow: FC<LinkDisplayRowProps> = ({
   return (
     <DataDisplayRow label={label} caption={caption} className={className}>
       {linkUrl && (
-        <WeaverLink
+        <TendiflowLink
           href={linkUrl}
           target={external ? "_blank" : "_self"}
           rel={external ? "noopener noreferrer" : undefined}
@@ -33,7 +33,7 @@ export const LinkDisplayRow: FC<LinkDisplayRowProps> = ({
         >
           <span className="truncate">{value}</span>
           {external && <ExternalLinkIcon className="w-3 h-3 flex-shrink-0" />}
-        </WeaverLink>
+        </TendiflowLink>
       )}
     </DataDisplayRow>
   );

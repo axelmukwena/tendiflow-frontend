@@ -1,7 +1,7 @@
 import { EllipsisVertical, PenBox } from "lucide-react";
 import { Fragment, useState } from "react";
 
-import { Organisation } from "@/api/services/weaver/organisations/types";
+import { Organisation } from "@/api/services/tendiflow/organisations/types";
 import { EntityDialog } from "@/components/dialogs/entity";
 import { Button } from "@/components/ui/button";
 import {

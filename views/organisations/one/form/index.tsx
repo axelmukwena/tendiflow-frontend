@@ -1,6 +1,6 @@
 import { FC, Fragment } from "react";
 
-import { Organisation } from "@/api/services/weaver/organisations/types";
+import { Organisation } from "@/api/services/tendiflow/organisations/types";
 import { SelectField } from "@/components/inputs/select/selectfield";
 import { SwitchField } from "@/components/inputs/switch";
 import { TextField } from "@/components/inputs/text";

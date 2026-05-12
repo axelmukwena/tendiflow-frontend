@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { MeetingSortBy } from "@/api/services/weaver/meetings/types";
-import { OrderBy } from "@/api/services/weaver/types/general";
+import { MeetingSortBy } from "@/api/services/tendiflow/meetings/types";
+import { OrderBy } from "@/api/services/tendiflow/types/general";
 import { useDebounce } from "@/hooks/utilities/debounce";
 import { useQueryParam } from "@/hooks/utilities/query-param";
 import { QueryParamKey } from "@/types/general";

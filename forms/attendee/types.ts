@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 
-import { Attendee } from "@/api/services/weaver/attendees/types";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
 
 import { AttendeeFormSchema } from "./schema";
 

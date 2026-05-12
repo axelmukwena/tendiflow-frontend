@@ -9,7 +9,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-import { WeaverMimeType } from "@/api/services/weaver/types/file";
+import { TendiflowMimeType } from "@/api/services/tendiflow/types/file";
 import { MenuItem, SelectOptionType } from "@/types/general";
 import { ClientPathname } from "@/types/paths";
 
@@ -86,12 +86,12 @@ export const ACCEPT_IMAGE_FILE_EXTENSIONS = ACCEPT_IMAGE_FILE_OPTIONS.map(
 ).join(", ");
 
 export const ACCEPT_DOCUMENT_FILE_OPTIONS: SelectOptionType[] = [
-  { name: "pdf", value: WeaverMimeType.PDF, color: "red" },
-  { name: "doc", value: WeaverMimeType.DOC, color: "blue" },
-  { name: "docx", value: WeaverMimeType.DOCX, color: "green" },
-  { name: "xls", value: WeaverMimeType.XLS, color: "orange" },
-  { name: "xlsx", value: WeaverMimeType.XLSX, color: "purple" },
-  { name: "csv", value: WeaverMimeType.CSV, color: "gray" },
+  { name: "pdf", value: TendiflowMimeType.PDF, color: "red" },
+  { name: "doc", value: TendiflowMimeType.DOC, color: "blue" },
+  { name: "docx", value: TendiflowMimeType.DOCX, color: "green" },
+  { name: "xls", value: TendiflowMimeType.XLS, color: "orange" },
+  { name: "xlsx", value: TendiflowMimeType.XLSX, color: "purple" },
+  { name: "csv", value: TendiflowMimeType.CSV, color: "gray" },
 ];
 
 export const ACCEPT_DOCUMENT_FILE_TYPES = ACCEPT_DOCUMENT_FILE_OPTIONS.map(
@@ -105,17 +105,17 @@ export const ACCEPT_DOCUMENT_FILE_EXTENSIONS = ACCEPT_DOCUMENT_FILE_OPTIONS.map(
 export const ACCEPT_SPREADSHEET_IMPORT_FILE_OPTIONS: SelectOptionType[] = [
   {
     name: "csv",
-    value: WeaverMimeType.CSV,
+    value: TendiflowMimeType.CSV,
     color: "orange",
   },
   {
     name: "xlsx",
-    value: WeaverMimeType.XLSX,
+    value: TendiflowMimeType.XLSX,
     color: "blue",
   },
   {
     name: "xls",
-    value: WeaverMimeType.XLS,
+    value: TendiflowMimeType.XLS,
     color: "green",
   },
 ];

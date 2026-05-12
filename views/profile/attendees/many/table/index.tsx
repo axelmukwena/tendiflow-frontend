@@ -3,8 +3,8 @@ import { FC } from "react";
 import {
   Attendee,
   AttendeeSortBy,
-} from "@/api/services/weaver/attendees/types";
-import { OrderBy } from "@/api/services/weaver/types/general";
+} from "@/api/services/tendiflow/attendees/types";
+import { OrderBy } from "@/api/services/tendiflow/types/general";
 import { Table, TableBody } from "@/components/ui/table";
 
 import { AttendeeTableEmpty } from "./empty";

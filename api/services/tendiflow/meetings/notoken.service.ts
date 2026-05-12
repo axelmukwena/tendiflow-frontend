@@ -1,7 +1,7 @@
 import { isRequestSuccess, processApiErrorResponse } from "@/api/utilities";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
-import { WeaverNoTokenApiService } from "../notoken.service";
+import { TendiflowNoTokenApiService } from "../notoken.service";
 import { DataServiceResponse } from "../types/general";
 import {
   ApiActionMeeting,
@@ -14,7 +14,7 @@ import { getMeetingApiUrlV1 } from "./utilities";
 /**
  * Service for meeting endpoints that don't require authentication (guest endpoints)
  */
-export class MeetingNoTokenService extends WeaverNoTokenApiService {
+export class MeetingNoTokenService extends TendiflowNoTokenApiService {
   /**
    * Get a public meeting by ID
    * @param {GetPublicMeetingProps} props - The organisation ID, meeting ID, and parameters

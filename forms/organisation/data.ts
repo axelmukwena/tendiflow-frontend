@@ -1,7 +1,7 @@
 import {
   OrganisationCreate,
   OrganisationUpdate,
-} from "@/api/services/weaver/organisations/types";
+} from "@/api/services/tendiflow/organisations/types";
 
 import {
   LoadOrganisationCreateData,

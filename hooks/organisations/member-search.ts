@@ -2,15 +2,15 @@
 
 import useSWR, { useSWRConfig } from "swr";
 
-import { getMemberOrganisationsFetcher } from "@/api/services/weaver/organisations/fetchers";
+import { getMemberOrganisationsFetcher } from "@/api/services/tendiflow/organisations/fetchers";
 import {
   ApiActionOrganisation,
   OrganisationParams,
   OrganisationQuery,
   OrganisationsManyResponse,
   UseOrganisations,
-} from "@/api/services/weaver/organisations/types";
-import { getOrganisationSwrUrlV1 } from "@/api/services/weaver/organisations/utilities";
+} from "@/api/services/tendiflow/organisations/types";
+import { getOrganisationSwrUrlV1 } from "@/api/services/tendiflow/organisations/utilities";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 
 import { useUserCredentials } from "../profile/credentials";

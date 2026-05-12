@@ -4,7 +4,7 @@ import {
   CustomFieldType,
   RecurringFrequency,
   RecurringUpdateType,
-} from "@/api/services/weaver/meetings/types";
+} from "@/api/services/tendiflow/meetings/types";
 
 // Meeting Location Coordinates Schema
 export const MEETING_COORDINATES_SCHEMA = z

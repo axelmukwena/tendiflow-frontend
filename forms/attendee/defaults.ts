@@ -3,7 +3,7 @@ import { DefaultValues } from "react-hook-form";
 import {
   AttendanceStatus,
   Attendee,
-} from "@/api/services/weaver/attendees/types";
+} from "@/api/services/tendiflow/attendees/types";
 
 import { AttendeeFormSchema } from "./schema";
 

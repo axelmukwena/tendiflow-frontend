@@ -1,7 +1,7 @@
 import { FC, Fragment } from "react";
 
-import { Attendee } from "@/api/services/weaver/attendees/types";
-import { CustomFieldType } from "@/api/services/weaver/meetings/types";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
+import { CustomFieldType } from "@/api/services/tendiflow/meetings/types";
 import { SelectField } from "@/components/inputs/select/selectfield";
 import { TextField } from "@/components/inputs/text";
 import { TextAreaField } from "@/components/inputs/textarea";

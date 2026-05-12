@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
-import { getAttendeesManyFetcher } from "@/api/services/weaver/attendees/fetchers";
+import { getAttendeesManyFetcher } from "@/api/services/tendiflow/attendees/fetchers";
 import {
   ApiActionAttendee,
   Attendee,
@@ -9,9 +9,9 @@ import {
   AttendeeQuery,
   AttendeesManyResponse,
   AttendeeSortBy,
-} from "@/api/services/weaver/attendees/types";
-import { getAttendeeSwrUrlV1 } from "@/api/services/weaver/attendees/utilities";
-import { DatabaseStatus, OrderBy } from "@/api/services/weaver/types/general";
+} from "@/api/services/tendiflow/attendees/types";
+import { getAttendeeSwrUrlV1 } from "@/api/services/tendiflow/attendees/utilities";
+import { DatabaseStatus, OrderBy } from "@/api/services/tendiflow/types/general";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 import { notify } from "@/utilities/helpers/toaster";

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-import { AttendeeService } from "@/api/services/weaver/attendees/service";
-import { Attendee } from "@/api/services/weaver/attendees/types";
-import { DatabaseStatus } from "@/api/services/weaver/types/general";
+import { AttendeeService } from "@/api/services/tendiflow/attendees/service";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
+import { DatabaseStatus } from "@/api/services/tendiflow/types/general";
 import { useUserCredentials } from "@/hooks/profile/credentials";
 import { notify } from "@/utilities/helpers/toaster";
 

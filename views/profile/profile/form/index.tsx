@@ -1,6 +1,6 @@
 import { FC, Fragment } from "react";
 
-import { User } from "@/api/services/weaver/users/types";
+import { User } from "@/api/services/tendiflow/users/types";
 import { SelectField } from "@/components/inputs/select/selectfield";
 import { TextField } from "@/components/inputs/text";
 import { Spinner } from "@/components/loaders/spinner";

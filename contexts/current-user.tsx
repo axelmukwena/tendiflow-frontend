@@ -2,8 +2,8 @@
 
 import React, { createContext, FC, ReactNode, useContext } from "react";
 
-import { CurrentUserContextType } from "@/api/services/weaver/profile/types";
-import { User } from "@/api/services/weaver/users/types";
+import { CurrentUserContextType } from "@/api/services/tendiflow/profile/types";
+import { User } from "@/api/services/tendiflow/users/types";
 import { getCurrentUserPermissions } from "@/hooks/profile/current";
 
 const CurrentUserContext = createContext<CurrentUserContextType | undefined>(

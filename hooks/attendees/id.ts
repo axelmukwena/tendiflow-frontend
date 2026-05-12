@@ -2,13 +2,13 @@
 
 import useSWR, { useSWRConfig } from "swr";
 
-import { getAttendeeByIdFetcher } from "@/api/services/weaver/attendees/fetchers";
+import { getAttendeeByIdFetcher } from "@/api/services/tendiflow/attendees/fetchers";
 import {
   ApiActionAttendee,
   Attendee,
   UseAttendee,
-} from "@/api/services/weaver/attendees/types";
-import { getAttendeeSwrUrlV1 } from "@/api/services/weaver/attendees/utilities";
+} from "@/api/services/tendiflow/attendees/types";
+import { getAttendeeSwrUrlV1 } from "@/api/services/tendiflow/attendees/utilities";
 import { useCurrentOrganisationContext } from "@/contexts/current-organisation";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 

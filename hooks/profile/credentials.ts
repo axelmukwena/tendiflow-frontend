@@ -8,8 +8,8 @@ import useSWR, { useSWRConfig } from "swr";
 import {
   getOauthTokenWithRefreshToken,
   logout as logoutOauth,
-} from "@/api/services/weaver/oauth/fetchers";
-import { OauthIdTokenPayload } from "@/api/services/weaver/oauth/types";
+} from "@/api/services/tendiflow/oauth/fetchers";
+import { OauthIdTokenPayload } from "@/api/services/tendiflow/oauth/types";
 import { LOGGED_OUT_PUBLIC_ROUTES } from "@/utilities/constants/paths";
 import { isDateExpiringSoon } from "@/utilities/helpers/date";
 import { CookieKey } from "@/utilities/helpers/enums";

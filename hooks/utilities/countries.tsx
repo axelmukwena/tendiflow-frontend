@@ -1,7 +1,7 @@
 import useSWR from "swr";
 
-import { getRestCountriesFetcher } from "@/api/services/weaver/country/fetchers";
-import { RestCountry } from "@/api/services/weaver/country/types";
+import { getRestCountriesFetcher } from "@/api/services/tendiflow/country/fetchers";
+import { RestCountry } from "@/api/services/tendiflow/country/types";
 import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 

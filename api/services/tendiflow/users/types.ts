@@ -1,5 +1,5 @@
 import { Membership } from "../memberships/types";
-import { WeaverFile } from "../types/file";
+import { TendiflowFile } from "../types/file";
 import {
   BasicApiResponse,
   ErrorApiResponse,
@@ -74,7 +74,7 @@ export interface UserActivity {
 }
 
 export interface UserAvatar {
-  avatar: WeaverFile | null;
+  avatar: TendiflowFile | null;
 }
 
 export interface UserRelatives {

@@ -138,7 +138,7 @@ export enum ApiActionOrganisation {
 }
 
 // Base interfaces
-export interface WeaverFile {
+export interface TendiflowFile {
   id: string;
   created_at: string;
   updated_at: string | null;
@@ -184,7 +184,7 @@ export interface OrganisationBase {
 }
 
 export interface OrganisationAvatar {
-  avatar: WeaverFile | null;
+  avatar: TendiflowFile | null;
 }
 
 export interface Organisation extends OrganisationBase, OrganisationAvatar {

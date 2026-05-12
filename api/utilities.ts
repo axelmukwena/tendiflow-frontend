@@ -8,7 +8,7 @@ import {
   DataServiceResponse,
   ErrorApiResponse,
   HeaderRequest,
-} from "./services/weaver/types/general";
+} from "./services/tendiflow/types/general";
 
 /**
  * Check if the request was successful

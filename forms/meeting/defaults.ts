@@ -3,7 +3,7 @@ import { DefaultValues } from "react-hook-form";
 import {
   Meeting,
   RecurringUpdateType,
-} from "@/api/services/weaver/meetings/types";
+} from "@/api/services/tendiflow/meetings/types";
 
 import { MeetingFormSchema } from "./schema";
 
