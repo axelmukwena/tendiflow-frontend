@@ -116,13 +116,45 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
         }
 
         const checkInMetadata = await collectCheckInMetadata();
-        const fpAgent = await load();
-        const result = await fpAgent.get();
-        setDeviceFingerprint(result.visitorId);
+
+        // FingerprintJS load()/get() can hang on iOS Safari (ITP blocks
+        // canvas/audio probes that the library uses). Race it against a
+        // wall-clock deadline and surface a clear error if it stalls — a
+        // random UUID fallback would silently break the per-device dedup.
+        const fingerprintPromise = (async (): Promise<string> => {
+          const fpAgent = await load();
+          const result = await fpAgent.get();
+          return result.visitorId;
+        })();
+        const fingerprintTimeout = new Promise<string>((_, reject) =>
+          setTimeout(() => reject(new Error("fingerprint_timeout")), 8_000),
+        );
+        let fingerprint: string;
+        try {
+          fingerprint = await Promise.race([
+            fingerprintPromise,
+            fingerprintTimeout,
+          ]);
+        } catch (fpError) {
+          console.error("FingerprintJS failed", fpError);
+          setValidationResult({
+            isValid: false,
+            errors: [
+              "We couldn't verify your device. This usually happens on " +
+                "iPhones with strict privacy settings. Try a different " +
+                "browser (e.g. Chrome) or disable Private Relay / Lockdown " +
+                "Mode, then try again.",
+            ],
+            warnings: [],
+          });
+          setCurrentStep("error");
+          return;
+        }
+        setDeviceFingerprint(fingerprint);
         const sessionId = generateUUID();
 
         const fullMetadata: CheckInMetadataWithFingerprint = {
-          fingerprint: result.visitorId,
+          fingerprint,
           sessionId,
           locationInfo: checkInMetadata.locationInfo,
           deviceInfo: checkInMetadata.deviceInfo,
@@ -135,7 +167,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
         const hasExistingCheckIn = await getByFingerprint(
           organisationId,
           meetingId,
-          result.visitorId,
+          fingerprint,
         );
 
         if (hasExistingCheckIn.success) {
@@ -343,12 +375,16 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
   // Loading state
   if (meetingLoading || currentStep === "loading") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-pulse text-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="animate-pulse text-center max-w-sm">
           <Spinner size="4" />
           <h3 className="mt-4 text-base/7 font-medium text-gray-900">
             Loading meeting...
           </h3>
+          <p className="mt-2 text-sm text-gray-500">
+            This can take up to 30 seconds the first time. If it&apos;s still
+            loading after a minute, please refresh the page.
+          </p>
         </div>
       </div>
     );
