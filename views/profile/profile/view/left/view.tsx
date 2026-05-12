@@ -1,15 +1,12 @@
-import { User as UserIcon } from "lucide-react";
 import { FC } from "react";
 
 import { UserKind, UserStatus } from "@/api/services/weaver/users/types";
 import { BadgeDisplayRow } from "@/components/data-display/badge";
 import { DataDisplayContainer } from "@/components/data-display/container";
-import { DateDisplayRow } from "@/components/data-display/date";
 import { EmailDisplayRow } from "@/components/data-display/email";
 import { ImagesDisplayRow } from "@/components/data-display/images";
 import { PhonenumberDisplayRow } from "@/components/data-display/phonenumber";
 import { TextDisplayRow } from "@/components/data-display/text";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUserContext } from "@/contexts/current-user";
 import { Variant } from "@/types/general";
 import { mergeTailwind } from "@/utilities/helpers/tailwind";
@@ -25,10 +22,6 @@ export const ProfileContentView: FC<ProfileContentViewProps> = ({
   className = "",
 }) => {
   const { currentUser: user, isLoading, error } = useCurrentUserContext();
-  const fullName = [user?.first_name, user?.last_name]
-    .filter(Boolean)
-    .join(" ");
-  const initials = `${user?.first_name?.[0] || ""}${user?.last_name?.[0] || ""}`;
 
   // Helper to format enum values into human-readable strings
   const formatEnumValue = (value: string): string => {
@@ -97,20 +90,6 @@ export const ProfileContentView: FC<ProfileContentViewProps> = ({
 
   return (
     <div className={mergeTailwind(className, "w-full")}>
-      {/* User Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={user.avatar_url || ""} alt={fullName} />
-          <AvatarFallback className="text-xl">
-            {initials || <UserIcon />}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <h2 className="text-2xl font-bold">{fullName}</h2>
-          <p className="text-sm text-gray-500">{user.email}</p>
-        </div>
-      </div>
-
       {/* Personal & Contact Information */}
       <DataDisplayContainer
         title="User Details"
@@ -184,37 +163,6 @@ export const ProfileContentView: FC<ProfileContentViewProps> = ({
         </DataDisplayContainer>
       )}
 
-      {/* Activity & Metadata */}
-      <DataDisplayContainer
-        title="System Information"
-        description="Activity and record metadata"
-      >
-        <DateDisplayRow
-          label="Last Logged In"
-          value={user.last_logged_in_at}
-          format="datetime"
-        />
-        <DateDisplayRow
-          label="Last Active"
-          value={user.last_active_at}
-          format="datetime"
-        />
-        <DateDisplayRow
-          label="Date Created"
-          value={user.created_at}
-          format="datetime"
-        />
-        <DateDisplayRow
-          label="Last Updated"
-          value={user.updated_at}
-          format="datetime"
-        />
-        <TextDisplayRow
-          label="User ID"
-          caption="Unique identifier"
-          value={user.id}
-        />
-      </DataDisplayContainer>
     </div>
   );
 };
