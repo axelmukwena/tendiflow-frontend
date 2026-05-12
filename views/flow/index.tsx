@@ -185,6 +185,28 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           return;
         }
 
+        // Populate the location-independent parts of the form now, so they
+        // survive an early-return to the permissions step. Without this,
+        // users taking the permissions path submit a payload missing
+        // device_fingerprint / session_id / checkin_datetime / checkin_device
+        // and the backend rejects it with a "checkin field required" error.
+        attendeeForm.hook.setValue(
+          "checkin.device_fingerprint",
+          fullMetadata.fingerprint,
+        );
+        attendeeForm.hook.setValue(
+          "checkin.session_id",
+          fullMetadata.sessionId,
+        );
+        attendeeForm.hook.setValue(
+          "checkin.checkin_datetime",
+          new Date().toISOString(),
+        );
+        attendeeForm.hook.setValue(
+          "checkin.checkin_device",
+          fullMetadata.deviceInfo,
+        );
+
         // Location handling for meetings that require it. Fast path:
         // if the browser already has permission cached for this origin,
         // call getCurrentPosition silently (no gesture needed) so repeat
@@ -227,26 +249,12 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           setMetadata({ ...fullMetadata });
         }
 
-        // Set form data and proceed to form
-        attendeeForm.hook.setValue(
-          "checkin.device_fingerprint",
-          fullMetadata.fingerprint,
-        );
-        attendeeForm.hook.setValue(
-          "checkin.session_id",
-          fullMetadata.sessionId,
-        );
-        attendeeForm.hook.setValue(
-          "checkin.checkin_datetime",
-          new Date().toISOString(),
-        );
+        // Location is either the (0,0) placeholder or the resolved fast-path
+        // coords by this point; the permissions handler sets it when the
+        // user takes the gesture path.
         attendeeForm.hook.setValue(
           "checkin.checkin_location",
           fullMetadata.locationInfo,
-        );
-        attendeeForm.hook.setValue(
-          "checkin.checkin_device",
-          fullMetadata.deviceInfo,
         );
         setCurrentStep("form");
       } catch (error) {
