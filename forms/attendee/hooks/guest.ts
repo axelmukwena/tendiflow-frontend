@@ -19,7 +19,12 @@ interface UseGuestAttendeeCreateUpdateProps {
   organisationId: string;
   attendee?: Attendee | null;
   onSuccess?: (attendee: Attendee) => void;
-  onError?: (error: string) => void;
+  /**
+   * `statuscode` is the HTTP status from the backend (forwarded through
+   * the Next.js proxy). The caller can use it to disambiguate e.g.
+   * 409 "already checked in" from a generic error.
+   */
+  onError?: (error: string, statuscode?: number) => void;
 }
 
 interface UseGuestAttendeeCreateUpdate {
@@ -86,7 +91,7 @@ export const useGuestAttendeeCreateUpdate = ({
           checkingReponse.error || "Check-in failed. Please try again.";
         notify({ message, type: "error" });
         if (onError) {
-          onError(message);
+          onError(message, checkingReponse.statuscode);
         }
         return false;
       }

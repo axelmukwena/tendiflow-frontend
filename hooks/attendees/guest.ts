@@ -24,6 +24,7 @@ interface FunctionReturn {
   attendee?: Attendee | null;
   success: boolean;
   error?: string | null;
+  statuscode?: number;
 }
 
 export interface UseGuestAttendeeReturn {
@@ -156,12 +157,14 @@ export const useGuestAttendee = ({
             attendee: response.data,
             success: true,
             error: null,
+            statuscode: response.statuscode,
           };
         }
         return {
           attendee: null,
           success: false,
           error: response.message || "Failed to check in guest attendee.",
+          statuscode: response.statuscode,
         };
       } catch (err) {
         return {

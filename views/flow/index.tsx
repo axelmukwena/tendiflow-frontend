@@ -96,7 +96,14 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     attendeeForm,
     organisationId,
     onSuccess: () => setCurrentStep("success"),
-    onError: () => setCurrentStep("error"),
+    onError: (_message, statuscode) => {
+      // The frontend's pre-flight getByFingerprint only catches a previous
+      // check-in by THIS device. Someone who checked in on a different
+      // device with the same email passes that check, then 409s on the
+      // backend's email-based dedup. Route those cases to the existing
+      // "already checked in" screen rather than a generic error.
+      setCurrentStep(statuscode === 409 ? "already_checked_in" : "error");
+    },
   });
 
   useEffect(() => {
@@ -404,13 +411,10 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           }
         : formValues.checkin,
     };
-    const success = await handleCreateGuest(submitValues);
-
-    if (success) {
-      setCurrentStep("success");
-    } else {
-      setCurrentStep("error");
-    }
+    // Step transitions happen inside onSuccess/onError of
+    // useGuestAttendeeCreateUpdate above — onError routes 409 to
+    // "already_checked_in" rather than the generic error state.
+    await handleCreateGuest(submitValues);
   };
 
   // Loading state
