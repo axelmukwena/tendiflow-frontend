@@ -1,5 +1,3 @@
-// lib/location/client.ts
-
 import {
   AttendeeCheckinDevice,
   AttendeeCheckinLocation,
@@ -8,50 +6,6 @@ import {
 export interface CheckInMetadata {
   locationInfo: AttendeeCheckinLocation;
   deviceInfo: AttendeeCheckinDevice;
-}
-
-/**
- * Get IP address from a free API service
- */
-async function getIpAddress(): Promise<string | null> {
-  try {
-    const response = await fetch("https://api.ipify.org?format=json");
-    const data = await response.json();
-    return data.ip;
-  } catch (error) {
-    console.error("Error fetching IP address:", error);
-    return null;
-  }
-}
-
-/**
- * Get address from coordinates using a free geocoding service
- */
-async function getAddressFromCoordinates(
-  latitude: number,
-  longitude: number,
-): Promise<string | null> {
-  try {
-    // Using OpenStreetMap's Nominatim service (free, no API key required)
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-      {
-        headers: {
-          "User-Agent": "MeetingAttendanceTracker/1.0",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`Geocoding API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.display_name || null;
-  } catch (error) {
-    console.error("Error getting address from coordinates:", error);
-    return null;
-  }
 }
 
 /**
@@ -130,61 +84,60 @@ function getDeviceInfo(userAgent: string): AttendeeCheckinDevice {
 }
 
 /**
- * Main function to collect all location and device information
+ * Collect all browser-side check-in metadata.
+ *
+ * Intentionally has zero third-party network calls — these used to hang
+ * indefinitely on slow/blocked free APIs (ipify, Nominatim). The backend
+ * now stamps the request IP from X-Forwarded-For and reverse-geocodes
+ * lat/lng via the Google Maps key, so the client only contributes what
+ * it alone knows: GPS coords + the user agent.
  */
 export async function collectCheckInMetadata(): Promise<CheckInMetadata> {
-  // Get user agent
   const userAgent =
     typeof navigator !== "undefined" ? navigator.userAgent : "Unknown";
 
-  // Initialize location info with required fields
+  // Backend will populate ip_address and address.
   const locationInfo: AttendeeCheckinLocation = {
-    latitude: 0, // Will be updated with actual coordinates
-    longitude: 0, // Will be updated with actual coordinates
+    latitude: 0,
+    longitude: 0,
     address: "",
     ip_address: "",
     accuracy: 0,
     timestamp: new Date().toISOString(),
   };
 
-  // Get device info
   const deviceInfo = getDeviceInfo(userAgent);
 
-  // Get IP address
-  const ipAddress = await getIpAddress();
-  locationInfo.ip_address = ipAddress || "";
-
-  // Get geolocation if available
   if (typeof navigator !== "undefined" && navigator.geolocation) {
     try {
-      // Wrap geolocation API in a promise
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
+      // The Geolocation API's `timeout` option only counts time spent
+      // acquiring a fix AFTER the permission prompt has been resolved. On
+      // Safari the prompt can sit indefinitely (e.g. user ignores it), so
+      // we race against a wall-clock deadline to keep the flow moving.
+      const position = await Promise.race<GeolocationPosition>([
+        new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
             enableHighAccuracy: true,
             timeout: 10000,
             maximumAge: 0,
           });
-        },
-      );
+        }),
+        new Promise<GeolocationPosition>((_, reject) =>
+          setTimeout(
+            () => reject(new Error("geolocation_wall_timeout")),
+            12_000,
+          ),
+        ),
+      ]);
 
       locationInfo.latitude = position.coords.latitude;
       locationInfo.longitude = position.coords.longitude;
       locationInfo.accuracy = position.coords.accuracy || 0;
-
-      // Get address from coordinates
-      const address = await getAddressFromCoordinates(
-        locationInfo.latitude,
-        locationInfo.longitude,
-      );
-      locationInfo.address = address || "";
     } catch (error) {
       console.error("Error getting geolocation:", error);
-      // Reset to empty values if geolocation fails
       locationInfo.latitude = 0;
       locationInfo.longitude = 0;
       locationInfo.accuracy = 0;
-      locationInfo.address = "";
     }
   }
 
