@@ -28,7 +28,6 @@ import {
 } from "@/forms/attendee/helpers";
 import { useAttendeeForm } from "@/forms/attendee/hooks/form";
 import { useGuestAttendeeCreateUpdate } from "@/forms/attendee/hooks/guest";
-import { useGuestAttendee } from "@/hooks/attendees/guest";
 import { usePublicMeeting } from "@/hooks/meetings/public";
 import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 import { generateUUID } from "@/utilities/helpers/id";
@@ -72,9 +71,6 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     useState<CheckInMetadataWithFingerprint | null>(null);
   const [validationResult, setValidationResult] =
     useState<CheckinValidationResult | null>(null);
-  const [deviceFingerprint, setDeviceFingerprint] = useState<string | null>(
-    null,
-  );
 
   const {
     meeting,
@@ -85,23 +81,24 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     meetingId,
   });
 
-  const { attendee, getByFingerprint } = useGuestAttendee({
-    organisationId,
-    meetingId,
-    deviceFingerprint,
-  });
-  const attendeeForm = useAttendeeForm({ meetingId, attendee });
+  // Not pre-filling the form from a fingerprint-matched attendee record:
+  // FingerprintJS open-source collides on iOS Safari (ITP starves it of
+  // entropy), so two different physical devices can hash to the same
+  // visitorId. Pre-filling from that lookup would leak one user's name
+  // and email to another. Email is the real identity key — the backend's
+  // email-based dedup at submit time catches genuine repeat check-ins
+  // via the 409 → already_checked_in path. Fingerprint is still recorded
+  // on the attendee record below for audit/anti-fraud signals.
+  const attendeeForm = useAttendeeForm({ meetingId });
 
   const { isSubmitting, handleCreateGuest } = useGuestAttendeeCreateUpdate({
     attendeeForm,
     organisationId,
     onSuccess: () => setCurrentStep("success"),
     onError: (_message, statuscode) => {
-      // The frontend's pre-flight getByFingerprint only catches a previous
-      // check-in by THIS device. Someone who checked in on a different
-      // device with the same email passes that check, then 409s on the
-      // backend's email-based dedup. Route those cases to the existing
-      // "already checked in" screen rather than a generic error.
+      // 409 = backend's email-based dedup tripped. Unlike fingerprint,
+      // an email match is a real identity match, so it's safe to route
+      // to the "already checked in" screen.
       setCurrentStep(statuscode === 409 ? "already_checked_in" : "error");
     },
   });
@@ -167,7 +164,6 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           setCurrentStep("error");
           return;
         }
-        setDeviceFingerprint(fingerprint);
         const sessionId = generateUUID();
 
         const fullMetadata: CheckInMetadataWithFingerprint = {
@@ -178,19 +174,6 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
         };
 
         setMetadata(fullMetadata);
-
-        // Check if already checked in for THIS meeting (fingerprint is scoped
-        // per meeting on the backend so the same device can attend others).
-        const hasExistingCheckIn = await getByFingerprint(
-          organisationId,
-          meetingId,
-          fingerprint,
-        );
-
-        if (hasExistingCheckIn.success) {
-          setCurrentStep("already_checked_in");
-          return;
-        }
 
         // Populate the form's `checkin` field as a single whole-object
         // setValue. Form defaults set `checkin: null` for fresh guests, so
@@ -279,7 +262,6 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     organisationId,
     meetingId,
     flowInitialized,
-    getByFingerprint,
     attendeeForm,
   ]);
 
@@ -562,87 +544,12 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
                 </div>
               </div>
 
-              {/* Show attendee details if available */}
-              {attendee && (
-                <div className="mt-6 border-t border-gray-200 pt-4">
-                  <h4 className="font-medium text-gray-900 mb-3">
-                    Your Check-in Details
-                  </h4>
-
-                  {/* Personal Information */}
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <p>
-                      <span className="font-medium text-gray-900">Name:</span>{" "}
-                      {attendee.first_name} {attendee.last_name}
-                    </p>
-                    <p>
-                      <span className="font-medium text-gray-900">Email:</span>{" "}
-                      {attendee.email}
-                    </p>
-                    {attendee.organisation_name && (
-                      <p>
-                        <span className="font-medium text-gray-900">
-                          Organisation:
-                        </span>{" "}
-                        {attendee.organisation_name}
-                      </p>
-                    )}
-                    {attendee.division && (
-                      <p>
-                        <span className="font-medium text-gray-900">
-                          Division:
-                        </span>{" "}
-                        {attendee.division}
-                      </p>
-                    )}
-                    {attendee.occupation && (
-                      <p>
-                        <span className="font-medium text-gray-900">
-                          Job Title:
-                        </span>{" "}
-                        {attendee.occupation}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Check-in Information */}
-                  {attendee.checkin && (
-                    <div className="mt-4 bg-gray-50 rounded-md p-3">
-                      <div className="flex items-start">
-                        <CheckCircle className="size-4 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                        <div className="text-xs text-gray-600 space-y-1">
-                          <p>
-                            <span className="font-medium">Checked in:</span>{" "}
-                            {new Date(
-                              attendee.checkin.checkin_datetime,
-                            ).toLocaleString()}
-                          </p>
-                          {attendee.checkin.checkin_device && (
-                            <p>
-                              <span className="font-medium">Device:</span>{" "}
-                              {attendee.checkin.checkin_device.browser} on{" "}
-                              {attendee.checkin.checkin_device.os}
-                            </p>
-                          )}
-                          {attendee.checkin.checkin_location?.address && (
-                            <p>
-                              <span className="font-medium">Location:</span>{" "}
-                              {attendee.checkin.checkin_location.address}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-4 text-xs text-gray-500">
-                    <p>
-                      If you need to update your information, please contact the
-                      meeting organizer.
-                    </p>
-                  </div>
-                </div>
-              )}
+              <div className="mt-4 text-xs text-gray-500">
+                <p>
+                  If you need to update your information, please contact the
+                  meeting organizer.
+                </p>
+              </div>
             </div>
           </div>
         </div>
