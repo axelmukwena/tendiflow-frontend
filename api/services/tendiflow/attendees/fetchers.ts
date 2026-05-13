@@ -90,21 +90,30 @@ export const getAttendeesAllFetcher = async ({
   let allAttendees: Attendee[] = [];
   let currentPage = 0;
   let totalCount = 0;
+  // Backend caps `limit` at 100 (AttendeeParams.limit). Must be passed
+  // explicitly in `params` — relying on the backend default of 20 while
+  // advancing skip in steps of 100 silently drops 80 records per page
+  // and never converges on `totalCount`, leading to an infinite loop of
+  // empty fetches that masquerades as a timeout.
   const limit = 100;
   do {
     const response = await getAttendeesManyFetcher({
       organisation_id,
-      params: { skip: currentPage * limit },
+      params: { skip: currentPage * limit, limit },
       query,
       getIdToken,
       requireIdsOrSearch,
     });
 
-    if (response && response.data) {
-      allAttendees = allAttendees.concat(response.data);
-      totalCount = response.total || 0;
-    } else {
-      break; // No more attendees to fetch
+    if (!response || !response.data) {
+      break;
+    }
+    allAttendees = allAttendees.concat(response.data);
+    totalCount = response.total || 0;
+    // Defensive: stop if the page returned nothing, in case totalCount
+    // and the actual rowcount disagree (e.g. records deleted mid-export).
+    if (response.data.length === 0) {
+      break;
     }
 
     currentPage++;

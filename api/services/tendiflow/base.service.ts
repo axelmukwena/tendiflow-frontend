@@ -27,7 +27,11 @@ export abstract class BaseApiService {
 
     this.api = axios.create({
       baseURL: this.baseURL,
-      timeout: config.timeout || 30000,
+      // 60s gives Cloud Run room to cold-start (min-instances=0) without
+      // user-visible timeout errors. The previous 30s budget was tight
+      // enough that first-request-after-idle export/large-list calls
+      // routinely tripped it.
+      timeout: config.timeout || 60000,
       headers: {
         "Content-type": "application/json",
         ...config.headers,
