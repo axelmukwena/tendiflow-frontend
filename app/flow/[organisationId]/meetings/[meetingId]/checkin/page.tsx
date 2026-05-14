@@ -34,9 +34,11 @@ export async function generateMetadata({
   const description = [dateText, meeting.address]
     .filter(Boolean)
     .join(" · ");
-  const url =
-    `${ENVIRONMENT_VARIABLES.NEXT_PUBLIC_SITE_BASE_URL}` +
-    `/flow/${organisationId}/meetings/${meetingId}/checkin`;
+  const baseUrl = ENVIRONMENT_VARIABLES.NEXT_PUBLIC_SITE_BASE_URL.replace(
+    /\/$/,
+    "",
+  );
+  const url = `${baseUrl}/flow/${organisationId}/meetings/${meetingId}/checkin`;
 
   return {
     title,
