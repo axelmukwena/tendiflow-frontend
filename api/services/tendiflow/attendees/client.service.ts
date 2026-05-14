@@ -1,10 +1,8 @@
 import {
   Attendee,
   AttendeeCreateGuestClient,
-  AttendeeFeedbackCreateClient,
-  CancelGuestAttendanceClientProps,
-  GetGuestAttendeeClientProps,
-  UpdateGuestAttendeeClientProps,
+  AttendeeGuestCheckinOtpRequestResponse,
+  AttendeeGuestCheckinOtpVerifyBody,
 } from "@/api/services/tendiflow/attendees/types";
 import { DataServiceResponse } from "@/api/services/tendiflow/types/general";
 import { HeaderKey } from "@/utilities/helpers/enums";
@@ -19,19 +17,19 @@ export class AttendeeClientService {
   private baseUrl = "/api";
 
   /**
-   * Guest check-in (register + check-in in one step)
+   * Request a guest check-in OTP via the Next.js proxy.
    */
-  async guestCheckin(
+  async requestGuestCheckinOtp(
     organisationId: string,
     data: AttendeeCreateGuestClient,
-  ): Promise<DataServiceResponse<Attendee | null>> {
+  ): Promise<DataServiceResponse<AttendeeGuestCheckinOtpRequestResponse | null>> {
     try {
       const headers = {
         [HeaderKey.CONTENT_TYPE]: "application/json",
         [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
       };
       const response = await fetch(
-        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/checkin`,
+        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/checkin/request-otp`,
         {
           method: "POST",
           headers,
@@ -43,7 +41,7 @@ export class AttendeeClientService {
     } catch (error) {
       return {
         success: false,
-        message: `Failed to check in guest: ${error}`,
+        message: `Failed to request check-in OTP: ${error}`,
         data: null,
         statuscode: 500,
       };
@@ -51,63 +49,28 @@ export class AttendeeClientService {
   }
 
   /**
-   * Get guest attendee by device fingerprint
+   * Verify a guest check-in OTP via the Next.js proxy. The cookie set by
+   * the backend on success is forwarded by the proxy route.
    */
-  async getGuestByFingerprint({
-    organisation_id,
-    meeting_id,
-    device_fingerprint,
-  }: GetGuestAttendeeClientProps): Promise<
-    DataServiceResponse<Attendee | null>
-  > {
+  async verifyGuestCheckinOtp(
+    organisationId: string,
+    data: AttendeeGuestCheckinOtpVerifyBody,
+  ): Promise<DataServiceResponse<Attendee | null>> {
     try {
       const headers = {
         [HeaderKey.CONTENT_TYPE]: "application/json",
         [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
       };
-      const qs = new URLSearchParams({ meeting_id }).toString();
       const response = await fetch(
-        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}?${qs}`,
+        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/checkin/verify-otp`,
         {
-          method: "GET",
-          headers,
-        },
-      );
-
-      return await response.json();
-    } catch (error) {
-      return {
-        success: false,
-        message: `Failed to get guest attendee: ${error}`,
-        data: null,
-        statuscode: 500,
-      };
-    }
-  }
-
-  /**
-   * Update guest attendee by device fingerprint
-   */
-  async updateGuestByFingerprint({
-    organisation_id,
-    meeting_id,
-    device_fingerprint,
-    data,
-  }: UpdateGuestAttendeeClientProps): Promise<
-    DataServiceResponse<Attendee | null>
-  > {
-    try {
-      const headers = {
-        [HeaderKey.CONTENT_TYPE]: "application/json",
-        [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
-      };
-      const qs = new URLSearchParams({ meeting_id }).toString();
-      const response = await fetch(
-        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}?${qs}`,
-        {
-          method: "PUT",
+          method: "POST",
           headers,
           body: JSON.stringify(data),
+          // Critical: include credentials so the Set-Cookie returned by the
+          // proxy (forwarded from the backend) actually lands in the browser
+          // and is sent on subsequent cancel/feedback calls.
+          credentials: "include",
         },
       );
 
@@ -115,7 +78,7 @@ export class AttendeeClientService {
     } catch (error) {
       return {
         success: false,
-        message: `Failed to update guest attendee: ${error}`,
+        message: `Failed to verify check-in OTP: ${error}`,
         data: null,
         statuscode: 500,
       };
@@ -123,69 +86,31 @@ export class AttendeeClientService {
   }
 
   /**
-   * Cancel guest attendance by device fingerprint
+   * Probe whether this browser already holds a valid check-in session for
+   * the given meeting. Returns the Attendee on hit, null on miss. The
+   * proxy reads the HttpOnly tendiflow_checkin_session cookie server-side
+   * (the browser can't), so we need `credentials: "include"` on the
+   * outbound request.
    */
-  async cancelGuestByFingerprint({
-    organisation_id,
-    meeting_id,
-    device_fingerprint,
-  }: CancelGuestAttendanceClientProps): Promise<
-    DataServiceResponse<Attendee | null>
-  > {
-    try {
-      const headers = {
-        [HeaderKey.CONTENT_TYPE]: "application/json",
-        [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
-      };
-      const qs = new URLSearchParams({ meeting_id }).toString();
-      const response = await fetch(
-        `${this.baseUrl}/organisations/${organisation_id}/attendees/guest/${device_fingerprint}?${qs}`,
-        {
-          method: "DELETE",
-          headers,
-        },
-      );
-
-      return await response.json();
-    } catch (error) {
-      return {
-        success: false,
-        message: `Failed to cancel guest attendance: ${error}`,
-        data: null,
-        statuscode: 500,
-      };
-    }
-  }
-
-  /**
-   * Submit guest feedback by device fingerprint
-   */
-  async submitGuestFeedback(
+  async getCheckinSessionAttendee(
     organisationId: string,
     meetingId: string,
-    deviceFingerprint: string,
-    data: AttendeeFeedbackCreateClient,
   ): Promise<DataServiceResponse<Attendee | null>> {
     try {
-      const headers = {
-        [HeaderKey.CONTENT_TYPE]: "application/json",
-        [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
-      };
       const qs = new URLSearchParams({ meeting_id: meetingId }).toString();
       const response = await fetch(
-        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/${deviceFingerprint}/feedback?${qs}`,
+        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/checkin/session?${qs}`,
         {
-          method: "POST",
-          headers,
-          body: JSON.stringify(data),
+          method: "GET",
+          headers: { [HeaderKey.CONTENT_TYPE]: "application/json" },
+          credentials: "include",
         },
       );
-
       return await response.json();
     } catch (error) {
       return {
         success: false,
-        message: `Failed to submit guest feedback: ${error}`,
+        message: `Failed to read check-in session: ${error}`,
         data: null,
         statuscode: 500,
       };

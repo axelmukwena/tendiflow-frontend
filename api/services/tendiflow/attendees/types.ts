@@ -37,11 +37,9 @@ export enum ApiActionAttendee {
   CANCEL = "CANCEL",
   SUBMIT_FEEDBACK = "SUBMIT_FEEDBACK",
   REGISTER = "REGISTER",
-  GUEST_CHECKIN = "GUEST_CHECKIN",
-  GET_GUEST_BY_FINGERPRINT = "GET_GUEST_BY_FINGERPRINT",
-  UPDATE_GUEST_BY_FINGERPRINT = "UPDATE_GUEST_BY_FINGERPRINT",
-  CANCEL_GUEST_BY_FINGERPRINT = "CANCEL_GUEST_BY_FINGERPRINT",
-  SUBMIT_GUEST_FEEDBACK = "SUBMIT_GUEST_FEEDBACK",
+  GUEST_CHECKIN_REQUEST_OTP = "GUEST_CHECKIN_REQUEST_OTP",
+  GUEST_CHECKIN_VERIFY_OTP = "GUEST_CHECKIN_VERIFY_OTP",
+  GUEST_CHECKIN_SESSION = "GUEST_CHECKIN_SESSION",
 }
 
 export interface AttendeeForeignKeys {
@@ -73,7 +71,6 @@ export interface AttendeeCheckinDevice {
 }
 
 export interface AttendeeCheckinInfo {
-  device_fingerprint: string;
   session_id: string;
   checkin_datetime: string;
   checkin_location: AttendeeCheckinLocation;
@@ -159,9 +156,6 @@ export type AttendeeCreateGuest = AttendeeCreateGuestClient;
 
 export interface AttendeeUpdate extends AttendeeBase {}
 
-export interface AttendeeUpdateGuestClient extends AttendeeBase {}
-export type AttendeeUpdateGuest = AttendeeUpdateGuestClient;
-
 export interface AttendeeCancel {
   status: AttendanceStatus;
 }
@@ -214,10 +208,6 @@ export interface AttendeeUserStatistics {
 export type GetAttendeesResponseApi = Attendee[] | ErrorApiResponse;
 export type GetAttendeeResponseApi = Attendee | ErrorApiResponse;
 export type RegisterAttendeeResponseApi = Attendee | ErrorApiResponse;
-export type GuestCheckinResponseApi = Attendee | ErrorApiResponse;
-export type GetGuestAttendeeResponseApi = Attendee | ErrorApiResponse;
-export type UpdateGuestAttendeeResponseApi = Attendee | ErrorApiResponse;
-export type CancelGuestAttendanceResponseApi = Attendee | ErrorApiResponse;
 export type UpdateAttendeeResponseApi = Attendee | ErrorApiResponse;
 export type UpdateAttendeeDatabaseStatusResponseApi =
   | Attendee
@@ -225,7 +215,6 @@ export type UpdateAttendeeDatabaseStatusResponseApi =
 export type DeleteAttendeeResponseApi = BasicApiResponse | ErrorApiResponse;
 export type CancelAttendanceResponseApi = Attendee | ErrorApiResponse;
 export type SubmitFeedbackResponseApi = Attendee | ErrorApiResponse;
-export type SubmitGuestFeedbackResponseApi = Attendee | ErrorApiResponse;
 export type GetAttendeeUserStatisticsResponseApi =
   | AttendeeUserStatistics
   | ErrorApiResponse;
@@ -247,33 +236,31 @@ export interface RegisterAttendeeProps {
   data: AttendeeBaseCreate;
 }
 
-export interface GuestCheckinProps {
+export interface AttendeeGuestCheckinOtpRequestResponse {
+  status: string;
+  expires_at: string;
+  expires_in_minutes: number;
+}
+
+export interface AttendeeGuestCheckinOtpVerifyBody {
+  code: string;
+  attendee: AttendeeCreateGuest;
+}
+
+export interface RequestGuestCheckinOtpProps {
   organisation_id: string;
   data: AttendeeCreateGuest;
 }
 
-export interface GetGuestAttendeeClientProps {
+export interface VerifyGuestCheckinOtpProps {
   organisation_id: string;
-  meeting_id: string;
-  device_fingerprint: string;
+  data: AttendeeGuestCheckinOtpVerifyBody;
 }
 
-export type GetGuestAttendeeProps = GetGuestAttendeeClientProps;
-
-export interface UpdateGuestAttendeeClientProps {
-  organisation_id: string;
-  meeting_id: string;
-  device_fingerprint: string;
-  data: AttendeeUpdateGuestClient;
-}
-export type UpdateGuestAttendeeProps = UpdateGuestAttendeeClientProps;
-
-export interface CancelGuestAttendanceClientProps {
-  organisation_id: string;
-  meeting_id: string;
-  device_fingerprint: string;
-}
-export type CancelGuestAttendanceProps = CancelGuestAttendanceClientProps;
+export type RequestGuestCheckinOtpResponseApi =
+  | AttendeeGuestCheckinOtpRequestResponse
+  | ErrorApiResponse;
+export type VerifyGuestCheckinOtpResponseApi = Attendee | ErrorApiResponse;
 
 export interface UpdateAttendeeProps {
   organisation_id: string;
@@ -300,13 +287,6 @@ export interface CancelAttendanceProps {
 export interface SubmitFeedbackProps {
   organisation_id: string;
   id: string;
-  data: AttendeeFeedbackCreate;
-}
-
-export interface SubmitGuestFeedbackProps {
-  organisation_id: string;
-  meeting_id: string;
-  device_fingerprint: string;
   data: AttendeeFeedbackCreate;
 }
 

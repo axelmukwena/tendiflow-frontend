@@ -36,7 +36,6 @@ const ATTENDEE_CHECKIN_DEVICE_SCHEMA = z
 // Attendee Checkin Info Schema
 const ATTENDEE_CHECKIN_INFO_SCHEMA = z
   .object({
-    device_fingerprint: z.string().min(1, "Device fingerprint is required"),
     session_id: z.string().min(1, "Session ID is required"),
     checkin_datetime: z.string().min(1, "Check-in datetime is required"),
     checkin_location: ATTENDEE_CHECKIN_LOCATION_SCHEMA,

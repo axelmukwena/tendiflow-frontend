@@ -29,7 +29,7 @@ export const POST = async (
   try {
     const params = await context.params;
     const { organisationId } = params;
-    const guestCheckinData: AttendeeCreateGuest = await req.json();
+    const body: AttendeeCreateGuest = await req.json();
 
     if (!organisationId) {
       return NextResponse.json(
@@ -41,9 +41,9 @@ export const POST = async (
     const headers = getHeadersNextRequest(req);
     const attendeeService = new AttendeeNoTokenService(headers);
 
-    const requestResponse = await attendeeService.guestCheckin({
+    const requestResponse = await attendeeService.requestGuestCheckinOtp({
       organisation_id: organisationId,
-      data: guestCheckinData,
+      data: body,
     });
 
     return NextResponse.json(requestResponse);
@@ -51,7 +51,7 @@ export const POST = async (
     return NextResponse.json(
       {
         success: false,
-        message: `Failed to check in guest: ${getErrorMessage(error)}`,
+        message: `Failed to request check-in OTP: ${getErrorMessage(error)}`,
       },
       { status: 500 },
     );

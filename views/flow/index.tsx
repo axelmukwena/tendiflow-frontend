@@ -1,12 +1,12 @@
 "use client";
 
-import { load } from "@fingerprintjs/fingerprintjs";
 import {
   AlertTriangle,
   Building2,
   Calendar,
   CheckCircle,
   Clock,
+  Mail,
   MapPin,
   Shield,
   XCircle,
@@ -14,7 +14,9 @@ import {
 import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 
+import { AttendeeClientService } from "@/api/services/tendiflow/attendees/client.service";
 import {
+  AttendanceStatus,
   AttendeeCheckinDevice,
   AttendeeCheckinLocation,
 } from "@/api/services/tendiflow/attendees/types";
@@ -28,6 +30,7 @@ import {
 } from "@/forms/attendee/helpers";
 import { useAttendeeForm } from "@/forms/attendee/hooks/form";
 import { useGuestAttendeeCreateUpdate } from "@/forms/attendee/hooks/guest";
+import { AttendeeFormSchema } from "@/forms/attendee/schema";
 import { usePublicMeeting } from "@/hooks/meetings/public";
 import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 import { generateUUID } from "@/utilities/helpers/id";
@@ -37,6 +40,8 @@ import {
 } from "@/utilities/helpers/location";
 
 import { GuestAttendeeForm } from "./form";
+
+const clientService = new AttendeeClientService();
 
 interface MeetingCheckInFlowViewProps {
   organisationId: string;
@@ -48,14 +53,14 @@ type FlowStep =
   | "permissions"
   | "form"
   | "preview"
+  | "awaiting_otp"
   | "success"
   | "error"
   | "already_checked_in"
   | "timing_error"
   | "location_error";
 
-interface CheckInMetadataWithFingerprint {
-  fingerprint: string;
+interface CheckInMetadata {
   sessionId: string;
   locationInfo: AttendeeCheckinLocation;
   deviceInfo: AttendeeCheckinDevice;
@@ -67,10 +72,13 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState<FlowStep>("loading");
   const [flowInitialized, setFlowInitialized] = useState(false);
-  const [metadata, setMetadata] =
-    useState<CheckInMetadataWithFingerprint | null>(null);
+  const [metadata, setMetadata] = useState<CheckInMetadata | null>(null);
   const [validationResult, setValidationResult] =
     useState<CheckinValidationResult | null>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpExpiresAt, setOtpExpiresAt] = useState<string | null>(null);
+  const [otpEmailSentTo, setOtpEmailSentTo] = useState<string | null>(null);
 
   const {
     meeting,
@@ -81,27 +89,22 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     meetingId,
   });
 
-  // Not pre-filling the form from a fingerprint-matched attendee record:
-  // FingerprintJS open-source collides on iOS Safari (ITP starves it of
-  // entropy), so two different physical devices can hash to the same
-  // visitorId. Pre-filling from that lookup would leak one user's name
-  // and email to another. Email is the real identity key — the backend's
-  // email-based dedup at submit time catches genuine repeat check-ins
-  // via the 409 → already_checked_in path. Fingerprint is still recorded
-  // on the attendee record below for audit/anti-fraud signals.
+  // Identity is the verified email (via the OTP flow). We deliberately do
+  // not pre-fill from any browser-derived signal: FingerprintJS open-source
+  // collides on iOS Safari (ITP starves entropy), and any lookup before
+  // the email is verified can leak one user's record to another.
   const attendeeForm = useAttendeeForm({ meetingId });
 
-  const { isSubmitting, handleCreateGuest } = useGuestAttendeeCreateUpdate({
-    attendeeForm,
-    organisationId,
-    onSuccess: () => setCurrentStep("success"),
-    onError: (_message, statuscode) => {
-      // 409 = backend's email-based dedup tripped. Unlike fingerprint,
-      // an email match is a real identity match, so it's safe to route
-      // to the "already checked in" screen.
-      setCurrentStep(statuscode === 409 ? "already_checked_in" : "error");
-    },
-  });
+  const { isSubmitting, handleRequestOtp, handleVerifyOtp } =
+    useGuestAttendeeCreateUpdate({
+      attendeeForm,
+      organisationId,
+      onSuccess: () => setCurrentStep("success"),
+      // onError fires for *unexpected* errors only — handleVerifyOtp
+      // returns 400/410/429 inline (handled in the OTP screen), and 409
+      // (already checked in) we route ourselves below.
+      onError: () => undefined,
+    });
 
   useEffect(() => {
     async function initializeFlow(): Promise<void> {
@@ -122,6 +125,28 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           return;
         }
 
+        // Hydrate from the tendiflow_checkin_session cookie if present.
+        // The OTP flow issues this cookie scoped to (attendee, meeting),
+        // so a returning user lands directly on "already checked in"
+        // instead of having to re-fill the form just to discover they're
+        // already in. Empty / expired / scope-mismatched → null, and we
+        // fall through to the normal flow.
+        const sessionResponse = await clientService.getCheckinSessionAttendee(
+          organisationId,
+          meetingId,
+        );
+        const sessionAttendee = sessionResponse.success
+          ? sessionResponse.data
+          : null;
+        if (
+          sessionAttendee &&
+          sessionAttendee.checkin &&
+          sessionAttendee.attendance_status !== AttendanceStatus.CANCELLED
+        ) {
+          setCurrentStep("already_checked_in");
+          return;
+        }
+
         // Skip GPS up-front: iOS Safari typically refuses to show the
         // permission prompt outside a user gesture, so calling it here
         // would just stall for ~12s and return empty coords. We hand
@@ -131,43 +156,9 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           requestLocation: false,
         });
 
-        // FingerprintJS load()/get() can hang on iOS Safari (ITP blocks
-        // canvas/audio probes that the library uses). Race it against a
-        // wall-clock deadline and surface a clear error if it stalls — a
-        // random UUID fallback would silently break the per-device dedup.
-        const fingerprintPromise = (async (): Promise<string> => {
-          const fpAgent = await load();
-          const result = await fpAgent.get();
-          return result.visitorId;
-        })();
-        const fingerprintTimeout = new Promise<string>((_, reject) =>
-          setTimeout(() => reject(new Error("fingerprint_timeout")), 8_000),
-        );
-        let fingerprint: string;
-        try {
-          fingerprint = await Promise.race([
-            fingerprintPromise,
-            fingerprintTimeout,
-          ]);
-        } catch (fpError) {
-          console.error("FingerprintJS failed", fpError);
-          setValidationResult({
-            isValid: false,
-            errors: [
-              "We couldn't verify your device. This usually happens on " +
-                "iPhones with strict privacy settings. Try a different " +
-                "browser (e.g. Chrome) or disable Private Relay / Lockdown " +
-                "Mode, then try again.",
-            ],
-            warnings: [],
-          });
-          setCurrentStep("error");
-          return;
-        }
         const sessionId = generateUUID();
 
-        const fullMetadata: CheckInMetadataWithFingerprint = {
-          fingerprint,
+        const fullMetadata: CheckInMetadata = {
           sessionId,
           locationInfo: checkInMetadata.locationInfo,
           deviceInfo: checkInMetadata.deviceInfo,
@@ -179,12 +170,9 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
         // setValue. Form defaults set `checkin: null` for fresh guests, so
         // we never rely on react-hook-form materialising a parent object
         // from nested-path setValues — instead we always write the full
-        // shape. Survives an early-return to the permissions step
-        // (handlePermissionsRequest tops it up with the resolved coords).
-        // `checkin_datetime` is refreshed again in handleConfirmCheckIn
-        // so the timestamp reflects the actual confirm tap.
+        // shape. `checkin_datetime` is refreshed again in
+        // handleConfirmCheckIn so the timestamp reflects the actual tap.
         attendeeForm.hook.setValue("checkin", {
-          device_fingerprint: fullMetadata.fingerprint,
           session_id: fullMetadata.sessionId,
           checkin_datetime: new Date().toISOString(),
           checkin_location: fullMetadata.locationInfo,
@@ -232,7 +220,6 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           fullMetadata.locationInfo = geoMetadata.locationInfo;
           setMetadata({ ...fullMetadata });
           attendeeForm.hook.setValue("checkin", {
-            device_fingerprint: fullMetadata.fingerprint,
             session_id: fullMetadata.sessionId,
             checkin_datetime: new Date().toISOString(),
             checkin_location: fullMetadata.locationInfo,
@@ -315,7 +302,6 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
         // Write the full checkin shape rather than relying on nested
         // setValue creating a parent object from the form's null default.
         attendeeForm.hook.setValue("checkin", {
-          device_fingerprint: updatedMetadata.fingerprint,
           session_id: updatedMetadata.sessionId,
           checkin_datetime: new Date().toISOString(),
           checkin_location: updatedMetadata.locationInfo,
@@ -360,31 +346,15 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     }
   };
 
-  // Handle final check-in confirmation
-  const handleConfirmCheckIn = async (): Promise<void> => {
-    if (!meeting || !metadata) return;
-
+  /**
+   * Build the submit-ready form values, refreshing checkin_datetime to
+   * the *current* moment so the backend's on-time/late determination
+   * reflects the actual confirm/verify tap rather than the much-earlier
+   * flow-init time.
+   */
+  const buildSubmitValues = (): AttendeeFormSchema => {
     const formValues = attendeeForm.hook.getValues();
-
-    // Final validation before check-in
-    const validation = validateCheckin(
-      meeting,
-      formValues.email,
-      formValues.first_name,
-      formValues.last_name,
-      metadata.locationInfo,
-    );
-
-    if (!validation.isValid) {
-      setValidationResult(validation);
-      setCurrentStep("form");
-      return;
-    }
-
-    // Refresh checkin_datetime to the actual confirmation moment rather
-    // than the (potentially several seconds older) flow-init time, so the
-    // backend's on-time/late determination is accurate.
-    const submitValues = {
+    return {
       ...formValues,
       checkin: formValues.checkin
         ? {
@@ -393,10 +363,113 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           }
         : formValues.checkin,
     };
-    // Step transitions happen inside onSuccess/onError of
-    // useGuestAttendeeCreateUpdate above — onError routes 409 to
-    // "already_checked_in" rather than the generic error state.
-    await handleCreateGuest(submitValues);
+  };
+
+  // Step 1 of OTP flow: from the preview screen, request a 6-digit code.
+  const handleConfirmCheckIn = async (): Promise<void> => {
+    if (!meeting || !metadata) return;
+
+    const formValues = attendeeForm.hook.getValues();
+    const validation = validateCheckin(
+      meeting,
+      formValues.email,
+      formValues.first_name,
+      formValues.last_name,
+      metadata.locationInfo,
+    );
+    if (!validation.isValid) {
+      setValidationResult(validation);
+      setCurrentStep("form");
+      return;
+    }
+
+    const submitValues = buildSubmitValues();
+    if (!submitValues) return;
+
+    const result = await handleRequestOtp(submitValues);
+    if (result.success) {
+      setOtpCode("");
+      setOtpError(null);
+      setOtpExpiresAt(result.expiresAt ?? null);
+      setOtpEmailSentTo(submitValues.email);
+      setCurrentStep("awaiting_otp");
+      return;
+    }
+    // 409 = backend says this email is already checked in. Route to the
+    // dedicated screen rather than a generic error.
+    if (result.statuscode === 409) {
+      setCurrentStep("already_checked_in");
+      return;
+    }
+    setValidationResult({
+      isValid: false,
+      errors: [result.error ?? "Failed to send verification code."],
+      warnings: [],
+    });
+    setCurrentStep("error");
+  };
+
+  // Step 2 of OTP flow: submit the typed 6-digit code.
+  const handleSubmitOtp = async (): Promise<void> => {
+    if (otpCode.length !== 6 || !/^\d{6}$/.test(otpCode)) {
+      setOtpError("Enter the 6-digit code from the email.");
+      return;
+    }
+    const submitValues = buildSubmitValues();
+    if (!submitValues) return;
+
+    setOtpError(null);
+    const result = await handleVerifyOtp(submitValues, otpCode);
+    if (result.success) {
+      // Transition handled by onSuccess in the hook (→ "success").
+      return;
+    }
+    if (result.statuscode === 400) {
+      setOtpError(
+        result.error || "That code didn't match. Try again.",
+      );
+      return;
+    }
+    if (result.statuscode === 410) {
+      setOtpError(
+        "Your code expired. Tap “Send a new code” to get a fresh one.",
+      );
+      return;
+    }
+    if (result.statuscode === 429) {
+      setOtpError(
+        "Too many wrong attempts. Tap “Send a new code” to try again.",
+      );
+      return;
+    }
+    if (result.statuscode === 409) {
+      setCurrentStep("already_checked_in");
+      return;
+    }
+    setValidationResult({
+      isValid: false,
+      errors: [result.error ?? "Failed to verify the code."],
+      warnings: [],
+    });
+    setCurrentStep("error");
+  };
+
+  const handleResendOtp = async (): Promise<void> => {
+    const submitValues = buildSubmitValues();
+    if (!submitValues) return;
+    setOtpError(null);
+    setOtpCode("");
+    const result = await handleRequestOtp(submitValues);
+    if (result.success) {
+      setOtpExpiresAt(result.expiresAt ?? null);
+      setOtpEmailSentTo(submitValues.email);
+      return;
+    }
+    if (result.statuscode === 409) {
+      setCurrentStep("already_checked_in");
+      return;
+    }
+    setOtpError(result.error ?? "Could not resend the code.");
   };
 
   // Loading state
@@ -809,8 +882,10 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
                   disabled={isSubmitting}
                   className="flex w-full justify-center items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-green-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:bg-gray-400"
                 >
-                  <CheckCircle className="mr-1.5 size-4" />
-                  {isSubmitting ? "Checking in..." : "Confirm Check-in"}
+                  <Mail className="mr-1.5 size-4" />
+                  {isSubmitting
+                    ? "Sending verification code..."
+                    : "Email me a verification code"}
                 </button>
 
                 <button
@@ -821,6 +896,125 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
                   ← Back to edit details
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Awaiting OTP state — single-input OTP per Apple HIG and to avoid the
+  // iOS 26.x split-six-input autocomplete="one-time-code" bug. The browser
+  // will still surface the code in the keyboard suggestion bar when the
+  // email arrives.
+  if (currentStep === "awaiting_otp") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="flex-grow flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-sm max-w-md w-full overflow-hidden">
+            <div className="px-4 py-5 sm:p-6 text-center">
+              <Mail className="mx-auto size-12 text-blue-500" />
+              <h3 className="mt-2 text-base/7 font-medium text-gray-900">
+                Check your email
+              </h3>
+              <p className="mt-1 text-sm/6 text-gray-500">
+                We sent a 6-digit code to{" "}
+                <span className="font-medium text-gray-700">
+                  {otpEmailSentTo || "your email"}
+                </span>
+                . Enter it below to complete check-in.
+              </p>
+            </div>
+
+            <div className="px-4 py-5 sm:p-6 border-t border-gray-200">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void handleSubmitOtp();
+                }}
+              >
+                <label
+                  htmlFor="otp-code"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Verification code
+                </label>
+                <input
+                  id="otp-code"
+                  name="code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="\d{6}"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value
+                      .replace(/\D/g, "")
+                      .slice(0, 6);
+                    setOtpCode(digitsOnly);
+                    if (otpError) setOtpError(null);
+                  }}
+                  autoFocus
+                  aria-invalid={!!otpError}
+                  aria-describedby={otpError ? "otp-error" : undefined}
+                  className="block w-full rounded-md border border-gray-300 px-3 py-3 text-center text-2xl font-mono tracking-[0.5em] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="000000"
+                />
+                {otpError && (
+                  <p
+                    id="otp-error"
+                    role="alert"
+                    className="mt-2 text-sm text-red-600"
+                  >
+                    {otpError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || otpCode.length !== 6}
+                  className="mt-6 w-full flex justify-center items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-green-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:bg-gray-400"
+                >
+                  <CheckCircle className="mr-1.5 size-4" />
+                  {isSubmitting ? "Verifying..." : "Verify & Check in"}
+                </button>
+              </form>
+
+              <div className="mt-4 flex flex-col items-center gap-2 text-sm">
+                <button
+                  type="button"
+                  onClick={() => void handleResendOtp()}
+                  disabled={isSubmitting}
+                  className="text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                >
+                  Send a new code
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpCode("");
+                    setOtpError(null);
+                    setCurrentStep("form");
+                  }}
+                  disabled={isSubmitting}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ← Back to edit details
+                </button>
+              </div>
+
+              {otpExpiresAt && (
+                <p className="mt-4 text-xs text-gray-400 text-center">
+                  Code expires at{" "}
+                  {new Date(otpExpiresAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                  .
+                </p>
+              )}
             </div>
           </div>
         </div>

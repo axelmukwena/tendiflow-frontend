@@ -3,7 +3,6 @@ import { ApiActionAttendee, AttendeeParams, AttendeeQuery } from "./types";
 interface AttendeeUrlBuildingParams {
   base_url: string;
   attendee_id?: string | null;
-  device_fingerprint?: string | null;
 }
 
 type AttendeeUrlBuilder = (params: AttendeeUrlBuildingParams) => string;
@@ -12,7 +11,6 @@ interface GetAttendeeApiUrlV1Params {
   organisation_id: string;
   action: ApiActionAttendee;
   attendee_id?: string | null;
-  device_fingerprint?: string | null;
 }
 
 /**
@@ -40,25 +38,13 @@ const attendeeUrlBuilders: Record<ApiActionAttendee, AttendeeUrlBuilder> = {
   // Registration endpoints
   [ApiActionAttendee.REGISTER]: ({ base_url }) => `${base_url}/register`,
 
-  // Guest endpoints (using device fingerprint)
-  [ApiActionAttendee.GUEST_CHECKIN]: ({ base_url }) =>
-    `${base_url}/checkin/public`,
-  [ApiActionAttendee.GET_GUEST_BY_FINGERPRINT]: ({
-    base_url,
-    device_fingerprint,
-  }) => `${base_url}/guest/${device_fingerprint}`,
-  [ApiActionAttendee.UPDATE_GUEST_BY_FINGERPRINT]: ({
-    base_url,
-    device_fingerprint,
-  }) => `${base_url}/guest/${device_fingerprint}`,
-  [ApiActionAttendee.CANCEL_GUEST_BY_FINGERPRINT]: ({
-    base_url,
-    device_fingerprint,
-  }) => `${base_url}/guest/${device_fingerprint}/cancel`,
-  [ApiActionAttendee.SUBMIT_GUEST_FEEDBACK]: ({
-    base_url,
-    device_fingerprint,
-  }) => `${base_url}/guest/${device_fingerprint}/feedback`,
+  // Guest check-in endpoints (OTP flow)
+  [ApiActionAttendee.GUEST_CHECKIN_REQUEST_OTP]: ({ base_url }) =>
+    `${base_url}/checkin/public/request-otp`,
+  [ApiActionAttendee.GUEST_CHECKIN_VERIFY_OTP]: ({ base_url }) =>
+    `${base_url}/checkin/public/verify-otp`,
+  [ApiActionAttendee.GUEST_CHECKIN_SESSION]: ({ base_url }) =>
+    `${base_url}/checkin/public/session`,
 };
 
 /**
@@ -72,7 +58,6 @@ export const getAttendeeApiUrlV1 = ({
   organisation_id,
   action,
   attendee_id,
-  device_fingerprint,
 }: GetAttendeeApiUrlV1Params): string => {
   const base_url = `/api/v1/organisations/${organisation_id}/attendees`;
 
@@ -84,7 +69,6 @@ export const getAttendeeApiUrlV1 = ({
   return urlBuilder({
     base_url,
     attendee_id,
-    device_fingerprint,
   });
 };
 
@@ -101,7 +85,6 @@ interface GetAttendeeSwrUrlParams extends GetAttendeeApiUrlV1Params {
  */
 export const getAttendeeSwrUrlV1 = ({
   attendee_id,
-  device_fingerprint,
   action,
   organisation_id,
   query,
@@ -111,7 +94,6 @@ export const getAttendeeSwrUrlV1 = ({
     attendee_id,
     action,
     organisation_id,
-    device_fingerprint,
   });
 
   return `${baseUrl}?query=${JSON.stringify(query)}&params=${JSON.stringify(params)}`;

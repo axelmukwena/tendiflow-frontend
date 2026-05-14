@@ -6,16 +6,11 @@ import { DataServiceResponse } from "../types/general";
 import {
   ApiActionAttendee,
   Attendee,
-  CancelGuestAttendanceProps,
-  CancelGuestAttendanceResponseApi,
-  GetGuestAttendeeProps,
-  GetGuestAttendeeResponseApi,
-  GuestCheckinProps,
-  GuestCheckinResponseApi,
-  SubmitGuestFeedbackProps,
-  SubmitGuestFeedbackResponseApi,
-  UpdateGuestAttendeeProps,
-  UpdateGuestAttendeeResponseApi,
+  AttendeeGuestCheckinOtpRequestResponse,
+  RequestGuestCheckinOtpProps,
+  RequestGuestCheckinOtpResponseApi,
+  VerifyGuestCheckinOtpProps,
+  VerifyGuestCheckinOtpResponseApi,
 } from "./types";
 import { getAttendeeApiUrlV1 } from "./utilities";
 
@@ -24,42 +19,40 @@ import { getAttendeeApiUrlV1 } from "./utilities";
  */
 export class AttendeeNoTokenService extends TendiflowNoTokenApiService {
   /**
-   * Guest check-in (register + check-in in one step)
-   * @param {GuestCheckinProps} props - The guest check-in data
-   * @returns {Promise<DataServiceResponse<Attendee | null>>} The attendee response
+   * Request a one-time check-in code for a guest attendee. The backend
+   * validates the proposed check-in and emails a 6-digit code; nothing is
+   * written until verify-otp succeeds.
    */
-  async guestCheckin({
+  async requestGuestCheckinOtp({
     organisation_id,
     data,
-  }: GuestCheckinProps): Promise<DataServiceResponse<Attendee | null>> {
+  }: RequestGuestCheckinOtpProps): Promise<
+    DataServiceResponse<AttendeeGuestCheckinOtpRequestResponse | null>
+  > {
     try {
-      const res = await this.api.post<GuestCheckinResponseApi>(
+      const res = await this.api.post<RequestGuestCheckinOtpResponseApi>(
         getAttendeeApiUrlV1({
           organisation_id,
-          action: ApiActionAttendee.GUEST_CHECKIN,
+          action: ApiActionAttendee.GUEST_CHECKIN_REQUEST_OTP,
         }),
         data,
       );
 
-      if (
-        isRequestSuccess(res.status) &&
-        "id" in res.data &&
-        "email" in res.data
-      ) {
+      if (isRequestSuccess(res.status) && "status" in res.data) {
         return {
           success: true,
-          message: "Guest checked in successfully",
+          message: "OTP sent to the attendee's email",
           data: res.data,
           statuscode: res.status,
         };
       }
 
-      return processApiErrorResponse(res, "Failed to check in guest");
+      return processApiErrorResponse(res, "Failed to request check-in OTP");
     } catch (error) {
       const message = getErrorMessage(error);
       return {
         success: false,
-        message: `Failed to check in guest. ${message}`,
+        message: `Failed to request check-in OTP. ${message}`,
         data: null,
         statuscode: 500,
       };
@@ -67,165 +60,22 @@ export class AttendeeNoTokenService extends TendiflowNoTokenApiService {
   }
 
   /**
-   * Get guest attendee by device fingerprint
-   * @param {GetGuestAttendeeProps} props - The device fingerprint data
-   * @returns {Promise<DataServiceResponse<Attendee | null>>} The attendee response
+   * Verify a guest check-in OTP. On success the backend writes the
+   * attendee record and sets the tendiflow_checkin_session cookie.
    */
-  async getGuestByFingerprint({
+  async verifyGuestCheckinOtp({
     organisation_id,
-    meeting_id,
-    device_fingerprint,
-  }: GetGuestAttendeeProps): Promise<DataServiceResponse<Attendee | null>> {
-    try {
-      const res = await this.api.get<GetGuestAttendeeResponseApi>(
-        getAttendeeApiUrlV1({
-          organisation_id,
-          device_fingerprint,
-          action: ApiActionAttendee.GET_GUEST_BY_FINGERPRINT,
-        }),
-        { params: { meeting_id } },
-      );
-
-      if (
-        isRequestSuccess(res.status) &&
-        "id" in res.data &&
-        "email" in res.data
-      ) {
-        return {
-          success: true,
-          message: "Guest attendee fetched successfully",
-          data: res.data,
-          statuscode: res.status,
-        };
-      }
-
-      return processApiErrorResponse(res, "Failed to fetch guest attendee");
-    } catch (error) {
-      const message = getErrorMessage(error);
-      return {
-        success: false,
-        message: `Failed to fetch guest attendee. ${message}`,
-        data: null,
-        statuscode: 500,
-      };
-    }
-  }
-
-  /**
-   * Update guest attendee by device fingerprint
-   * @param {UpdateGuestAttendeeProps} props - The guest update data
-   * @returns {Promise<DataServiceResponse<Attendee | null>>} The attendee response
-   */
-  async updateGuestByFingerprint({
-    organisation_id,
-    meeting_id,
-    device_fingerprint,
     data,
-  }: UpdateGuestAttendeeProps): Promise<DataServiceResponse<Attendee | null>> {
-    try {
-      const res = await this.api.put<UpdateGuestAttendeeResponseApi>(
-        getAttendeeApiUrlV1({
-          organisation_id,
-          device_fingerprint,
-          action: ApiActionAttendee.UPDATE_GUEST_BY_FINGERPRINT,
-        }),
-        data,
-        { params: { meeting_id } },
-      );
-
-      if (
-        isRequestSuccess(res.status) &&
-        "id" in res.data &&
-        "email" in res.data
-      ) {
-        return {
-          success: true,
-          message: "Guest attendee updated successfully",
-          data: res.data,
-          statuscode: res.status,
-        };
-      }
-
-      return processApiErrorResponse(res, "Failed to update guest attendee");
-    } catch (error) {
-      const message = getErrorMessage(error);
-      return {
-        success: false,
-        message: `Failed to update guest attendee. ${message}`,
-        data: null,
-        statuscode: 500,
-      };
-    }
-  }
-
-  /**
-   * Cancel guest attendance by device fingerprint
-   * @param {CancelGuestAttendanceProps} props - The guest cancellation data
-   * @returns {Promise<DataServiceResponse<Attendee | null>>} The attendee response
-   */
-  async cancelGuestByFingerprint({
-    organisation_id,
-    meeting_id,
-    device_fingerprint,
-  }: CancelGuestAttendanceProps): Promise<
+  }: VerifyGuestCheckinOtpProps): Promise<
     DataServiceResponse<Attendee | null>
   > {
     try {
-      const res = await this.api.put<CancelGuestAttendanceResponseApi>(
+      const res = await this.api.post<VerifyGuestCheckinOtpResponseApi>(
         getAttendeeApiUrlV1({
           organisation_id,
-          device_fingerprint,
-          action: ApiActionAttendee.CANCEL_GUEST_BY_FINGERPRINT,
-        }),
-        {},
-        { params: { meeting_id } },
-      );
-
-      if (
-        isRequestSuccess(res.status) &&
-        "id" in res.data &&
-        "email" in res.data
-      ) {
-        return {
-          success: true,
-          message: "Guest attendance cancelled successfully",
-          data: res.data,
-          statuscode: res.status,
-        };
-      }
-
-      return processApiErrorResponse(res, "Failed to cancel guest attendance");
-    } catch (error) {
-      const message = getErrorMessage(error);
-      return {
-        success: false,
-        message: `Failed to cancel guest attendance. ${message}`,
-        data: null,
-        statuscode: 500,
-      };
-    }
-  }
-
-  /**
-   * Submit guest feedback by device fingerprint
-   * @param {SubmitGuestFeedbackProps} props - The guest feedback data
-   * @returns {Promise<DataServiceResponse<Attendee | null>>} The attendee response
-   */
-  async submitGuestFeedback({
-    organisation_id,
-    meeting_id,
-    device_fingerprint,
-    data,
-  }: SubmitGuestFeedbackProps): Promise<DataServiceResponse<Attendee | null>> {
-    try {
-      const res = await this.api.post<SubmitGuestFeedbackResponseApi>(
-        getAttendeeApiUrlV1({
-          organisation_id,
-          device_fingerprint,
-          action: ApiActionAttendee.SUBMIT_GUEST_FEEDBACK,
+          action: ApiActionAttendee.GUEST_CHECKIN_VERIFY_OTP,
         }),
         data,
-        { params: { meeting_id } },
       );
 
       if (
@@ -235,21 +85,22 @@ export class AttendeeNoTokenService extends TendiflowNoTokenApiService {
       ) {
         return {
           success: true,
-          message: "Guest feedback submitted successfully",
+          message: "Check-in confirmed",
           data: res.data,
           statuscode: res.status,
         };
       }
 
-      return processApiErrorResponse(res, "Failed to submit guest feedback");
+      return processApiErrorResponse(res, "Failed to verify check-in OTP");
     } catch (error) {
       const message = getErrorMessage(error);
       return {
         success: false,
-        message: `Failed to submit guest feedback. ${message}`,
+        message: `Failed to verify check-in OTP. ${message}`,
         data: null,
         statuscode: 500,
       };
     }
   }
+
 }

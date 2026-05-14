@@ -212,11 +212,6 @@ export const AttendeeContentView: FC<AttendeeContentViewProps> = ({
             format="datetime"
           />
           <TextDisplayRow
-            label="Device Fingerprint"
-            caption="Unique device identifier"
-            value={attendee.checkin.device_fingerprint}
-          />
-          <TextDisplayRow
             label="Session ID"
             caption="Check-in session identifier"
             value={attendee.checkin.session_id}

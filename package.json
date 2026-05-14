@@ -13,7 +13,6 @@
     "ci": "CI=true npm run lint && npm run type-check && next build"
   },
   "dependencies": {
-    "@fingerprintjs/fingerprintjs": "^4.6.2",
     "@hookform/resolvers": "^5.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
