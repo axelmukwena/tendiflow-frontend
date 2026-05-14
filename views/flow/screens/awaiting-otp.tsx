@@ -1,5 +1,7 @@
-import { CheckCircle, Mail } from "lucide-react";
+import { CheckCircle, Mail, MessageSquare } from "lucide-react";
 import { FC } from "react";
+
+import { OtpChannel } from "@/api/services/tendiflow/attendees/types";
 
 import { Footer } from "../footer";
 
@@ -9,6 +11,8 @@ interface AwaitingOtpScreenProps {
   otpError: string | null;
   otpExpiresAt: string | null;
   otpEmailSentTo: string | null;
+  otpChannel: OtpChannel;
+  otpPhoneSentTo: string | null;
   isSubmitting: boolean;
   onSubmit: () => void;
   onResend: () => void;
@@ -18,7 +22,7 @@ interface AwaitingOtpScreenProps {
 /**
  * Single-input OTP per Apple HIG and to avoid the iOS 26.x split-six-input
  * autocomplete="one-time-code" bug. The browser still surfaces the code in
- * the keyboard suggestion bar when the email arrives.
+ * the keyboard suggestion bar when the message arrives.
  */
 export const AwaitingOtpScreen: FC<AwaitingOtpScreenProps> = ({
   otpCode,
@@ -26,24 +30,32 @@ export const AwaitingOtpScreen: FC<AwaitingOtpScreenProps> = ({
   otpError,
   otpExpiresAt,
   otpEmailSentTo,
+  otpChannel,
+  otpPhoneSentTo,
   isSubmitting,
   onSubmit,
   onResend,
   onBack,
-}) => (
+}) => {
+  const isSms = otpChannel === "sms";
+  const ChannelIcon = isSms ? MessageSquare : Mail;
+  const channelLabel = isSms ? "phone" : "email";
+  const destination = isSms
+    ? otpPhoneSentTo || "your phone"
+    : otpEmailSentTo || "your email";
+
+  return (
   <div className="min-h-screen bg-gray-50 flex flex-col">
     <div className="flex-grow flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-sm max-w-md w-full overflow-hidden">
         <div className="px-4 py-5 sm:p-6 text-center">
-          <Mail className="mx-auto size-12 text-blue-500" />
+          <ChannelIcon className="mx-auto size-12 text-blue-500" />
           <h3 className="mt-2 text-base/7 font-medium text-gray-900">
-            Check your email
+            {isSms ? "Check your messages" : "Check your email"}
           </h3>
           <p className="mt-1 text-sm/6 text-gray-500">
-            We sent a 6-digit code to{" "}
-            <span className="font-medium text-gray-700">
-              {otpEmailSentTo || "your email"}
-            </span>
+            We sent a 6-digit code to your {channelLabel}{" "}
+            <span className="font-medium text-gray-700">({destination})</span>
             . Enter it below to complete check-in.
           </p>
         </div>
@@ -133,4 +145,5 @@ export const AwaitingOtpScreen: FC<AwaitingOtpScreenProps> = ({
     </div>
     <Footer />
   </div>
-);
+  );
+};

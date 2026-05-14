@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { AttendeeClientService } from "@/api/services/tendiflow/attendees/client.service";
-import { Attendee } from "@/api/services/tendiflow/attendees/types";
+import { Attendee, OtpChannel } from "@/api/services/tendiflow/attendees/types";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 import { notify } from "@/utilities/helpers/toaster";
 
@@ -31,6 +31,7 @@ export interface RequestOtpResult {
   statuscode?: number;
   expiresAt?: string;
   expiresInMinutes?: number;
+  channel?: OtpChannel;
   error?: string;
 }
 
@@ -64,21 +65,23 @@ export const useGuestAttendeeCreateUpdate = ({
 
   /**
    * Step 1 of the OTP flow. Submits the full form to /request-otp; the
-   * backend validates and (on success) emails a 6-digit code.
+   * backend validates and (on success) sends a 6-digit code via the chosen
+   * channel (email or SMS).
    *
-   * Toasts only on unexpected errors. 409 (already checked in) is
-   * surfaced to the caller via statuscode so the flow view can route to
-   * its own screen rather than show a generic error.
+   * Toasts only on unexpected errors. 409 (already checked in) and 429
+   * (rate limited) are surfaced to the caller via statuscode so the flow
+   * view can route appropriately. 429 also shows a friendly toast.
    */
   const handleRequestOtp = async (
     values: GuestCheckinFormSchema,
   ): Promise<RequestOtpResult> => {
     setIsSubmitting(true);
     try {
-      const data = getGuestAttendeeCreateData({ values });
+      const attendee = getGuestAttendeeCreateData({ values });
+      const channel: OtpChannel = values.channel ?? "email";
       const response = await clientService.requestGuestCheckinOtp(
         organisationId,
-        data,
+        { channel, attendee },
       );
       if (response.success && response.data) {
         return {
@@ -86,10 +89,22 @@ export const useGuestAttendeeCreateUpdate = ({
           statuscode: response.statuscode,
           expiresAt: response.data.expires_at,
           expiresInMinutes: response.data.expires_in_minutes,
+          channel: response.data.channel,
         };
       }
       const message =
         response.message || "Could not send the verification code.";
+      if (response.statuscode === 429) {
+        notify({
+          type: "error",
+          message: "Too many requests. Please wait before requesting another code.",
+        });
+        return {
+          success: false,
+          statuscode: response.statuscode,
+          error: message,
+        };
+      }
       if (response.statuscode !== 409) {
         notify({ message, type: "error" });
       }
