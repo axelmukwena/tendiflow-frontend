@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { FC } from "react";
 
 import {
@@ -16,6 +17,8 @@ import { AttendeeTable } from "./table";
 interface ProfileAttendeesContentProps {}
 
 export const ProfileAttendeesContent: FC<ProfileAttendeesContentProps> = () => {
+  const router = useRouter();
+
   const {
     search,
     sortBy,
@@ -43,7 +46,7 @@ export const ProfileAttendeesContent: FC<ProfileAttendeesContentProps> = () => {
   };
 
   const handleRowClick = (attendee: Attendee): void => {
-    console.log("Row clicked:", attendee);
+    router.push(`/attendances/${attendee.id}`);
   };
 
   return (

@@ -136,6 +136,37 @@ export const getAttendeeUserStatisticsFetcher = async ({
   throw new Error(res.message);
 };
 
+interface GetAttendeeUserFetcherProps {
+  user_id?: string | null;
+  attendance_id?: string | null;
+  getIdToken: () => Promise<string>;
+}
+
+/**
+ * Fetches a single attendance record owned by the current user. Returns
+ * the Attendee with `meeting` and `organisation` populated server-side, so
+ * the detail page can render everything from one response.
+ */
+export const getAttendeeUserFetcher = async ({
+  user_id,
+  attendance_id,
+  getIdToken,
+}: GetAttendeeUserFetcherProps): Promise<Attendee | null> => {
+  if (!user_id || !attendance_id) {
+    return null;
+  }
+  const token = await getIdToken();
+  const profileService = new ProfileService(token);
+  const res = await profileService.getAttendeeUser({
+    user_id,
+    attendance_id,
+  });
+  if (res.success && res.data) {
+    return res.data;
+  }
+  throw new Error(res.message);
+};
+
 interface GetManyAttendeeUserFetcherProps {
   getIdToken: () => Promise<string>;
   userId: string;
