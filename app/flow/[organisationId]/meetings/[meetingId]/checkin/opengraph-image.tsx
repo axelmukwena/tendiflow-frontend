@@ -77,8 +77,8 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
           display: "flex",
           flexDirection: "column",
           padding: "64px",
-          background: "#0a0a0a",
-          color: "#ffffff",
+          background: "#ffffff",
+          color: "#0a0a0a",
           fontFamily: "Inter",
         }}
       >
@@ -88,7 +88,7 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
             fontWeight: 700,
             letterSpacing: "0.04em",
             textTransform: "uppercase",
-            color: "#a3a3a3",
+            color: "#525252",
           }}
         >
           Tendiflow · Meeting Check-in
@@ -111,7 +111,7 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
           style={{
             fontSize: 36,
             fontWeight: 500,
-            color: "#d4d4d4",
+            color: "#262626",
             marginTop: 24,
             display: "flex",
           }}
@@ -122,7 +122,7 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
         <div
           style={{
             marginTop: "auto",
-            color: "#a3a3a3",
+            color: "#525252",
             fontSize: 28,
             fontWeight: 500,
             display: "flex",
