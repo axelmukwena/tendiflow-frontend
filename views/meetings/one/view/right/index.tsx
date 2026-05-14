@@ -9,6 +9,20 @@ interface MeetingRightSectionProps {
   meeting: Meeting;
 }
 
+// Append a version stamp tied to the meeting's last-write time. Chat apps
+// (WhatsApp in particular) cache OG previews per URL for days/weeks with no
+// public flush tool; bumping the query string forces a fresh fetch the next
+// time someone shares the link after an edit. The check-in page ignores `v`.
+const buildShareableCheckInUrl = (meeting: Meeting): string | null => {
+  if (!meeting.check_in_url) return null;
+  const stamp = meeting.updated_at ?? meeting.created_at;
+  if (!stamp) return meeting.check_in_url;
+  const version = Date.parse(stamp);
+  if (Number.isNaN(version)) return meeting.check_in_url;
+  const separator = meeting.check_in_url.includes("?") ? "&" : "?";
+  return `${meeting.check_in_url}${separator}v=${version}`;
+};
+
 export const MeetingRightSection: FC<MeetingRightSectionProps> = ({
   meeting,
 }) => (
@@ -23,7 +37,7 @@ export const MeetingRightSection: FC<MeetingRightSectionProps> = ({
           label="QR Code"
           caption="Scan for easy meeting access and attendance tracking."
           qrcode={meeting.qrcode}
-          checkInUrl={meeting.check_in_url}
+          checkInUrl={buildShareableCheckInUrl(meeting)}
         />
       )}
     </DataDisplayContainer>
