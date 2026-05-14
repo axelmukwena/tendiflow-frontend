@@ -5,6 +5,7 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "tw-animate-css";
+@import "react-phone-number-input/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
