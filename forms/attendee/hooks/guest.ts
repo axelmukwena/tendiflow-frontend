@@ -95,9 +95,19 @@ export const useGuestAttendeeCreateUpdate = ({
       const message =
         response.message || "Could not send the verification code.";
       if (response.statuscode === 429) {
+        // Extract retry_after_seconds from the backend message:
+        // "Too many OTP requests. Retry in 3600 seconds."
+        let toastMessage =
+          "Too many requests. Please wait before requesting another code.";
+        const match = message.match(/Retry in (\d+) seconds/);
+        if (match) {
+          const seconds = parseInt(match[1], 10);
+          const minutes = Math.max(1, Math.ceil(seconds / 60));
+          toastMessage = `You've requested too many codes. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
+        }
         notify({
           type: "error",
-          message: "Too many requests. Please wait before requesting another code.",
+          message: toastMessage,
         });
         return {
           success: false,
