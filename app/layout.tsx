@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: `${siteBaseUrl}/static/tendiflow-seo.png`,
-        width: 5001,
-        height: 2813,
+        width: 1201,
+        height: 676,
         alt: "Tendiflow — Streamline Meeting Attendance",
       },
     ],
