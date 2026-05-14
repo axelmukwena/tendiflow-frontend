@@ -38,12 +38,21 @@ export const metadata: Metadata = {
     siteName: "Tendiflow",
     description:
       "Replace paper sign-in sheets with a modern digital solution for tracking meeting attendance",
+    images: [
+      {
+        url: `${siteBaseUrl}/static/tendiflow-seo.png`,
+        width: 5001,
+        height: 2813,
+        alt: "Tendiflow — Streamline Meeting Attendance",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Tendiflow - Digital Meeting Attendance Tracker",
     description:
       "Modern solution for tracking meeting attendance with QR code check-in",
+    images: [`${siteBaseUrl}/static/tendiflow-seo.png`],
   },
   assets: `${siteBaseUrl}/static/`,
   keywords: [
