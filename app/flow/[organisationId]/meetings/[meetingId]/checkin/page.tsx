@@ -1,6 +1,11 @@
+import { Metadata } from "next";
 import { FC } from "react";
 
+import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
+import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 import { MeetingCheckInFlowView } from "@/views/flow";
+
+import { fetchMeetingForMeta } from "./_meta";
 
 type Params = Promise<{
   organisationId: string;
@@ -11,9 +16,49 @@ interface CheckInPageProps {
   params: Params;
 }
 
+export async function generateMetadata({
+  params,
+}: CheckInPageProps): Promise<Metadata> {
+  const { organisationId, meetingId } = await params;
+  const meeting = await fetchMeetingForMeta(organisationId, meetingId);
+
+  // Operational URL — never index even on the failure path.
+  const robots = { index: false, follow: false };
+
+  if (!meeting) {
+    return { robots };
+  }
+
+  const title = `${meeting.title} — ${meeting.organisation_name}`;
+  const dateText = getFormattedDateAndTime({ utc: meeting.start_datetime });
+  const description = [dateText, meeting.address]
+    .filter(Boolean)
+    .join(" · ");
+  const url =
+    `${ENVIRONMENT_VARIABLES.NEXT_PUBLIC_SITE_BASE_URL}` +
+    `/flow/${organisationId}/meetings/${meetingId}/checkin`;
+
+  return {
+    title,
+    description,
+    robots,
+    openGraph: {
+      type: "website",
+      url,
+      title,
+      siteName: "Tendiflow",
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
+
 const CheckInPage: FC<CheckInPageProps> = async (props) => {
   const params = await props.params;
-
   return (
     <MeetingCheckInFlowView
       organisationId={params.organisationId}
