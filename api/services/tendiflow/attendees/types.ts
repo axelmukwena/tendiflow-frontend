@@ -238,20 +238,32 @@ export interface RegisterAttendeeProps {
   data: AttendeeBaseCreate;
 }
 
+export type OtpChannel = "email" | "sms";
+
+export interface AttendeeGuestCheckinOtpRequestBody {
+  channel: OtpChannel;
+  attendee: AttendeeCreateGuest;
+}
+
 export interface AttendeeGuestCheckinOtpRequestResponse {
   status: string;
   expires_at: string;
   expires_in_minutes: number;
+  channel: OtpChannel;
 }
 
 export interface AttendeeGuestCheckinOtpVerifyBody {
   code: string;
+  // Tells the backend which OTP backend to validate against (local Verification
+  // table for email vs Twilio Verify for SMS). Must match the channel that was
+  // used when request-otp was called.
+  channel: OtpChannel;
   attendee: AttendeeCreateGuest;
 }
 
 export interface RequestGuestCheckinOtpProps {
   organisation_id: string;
-  data: AttendeeCreateGuest;
+  data: AttendeeGuestCheckinOtpRequestBody;
 }
 
 export interface VerifyGuestCheckinOtpProps {

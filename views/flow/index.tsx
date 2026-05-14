@@ -8,6 +8,7 @@ import {
   Attendee,
   AttendeeCheckinDevice,
   AttendeeCheckinLocation,
+  OtpChannel,
 } from "@/api/services/tendiflow/attendees/types";
 import {
   CheckinValidationResult,
@@ -15,9 +16,9 @@ import {
   validateCheckinLocation,
   validateCheckinTiming,
 } from "@/forms/attendee/helpers";
-import { useAttendeeForm } from "@/forms/attendee/hooks/form";
+import { useGuestCheckinAttendeeForm } from "@/forms/attendee/hooks/form";
 import { useGuestAttendeeCreateUpdate } from "@/forms/attendee/hooks/guest";
-import { AttendeeFormSchema } from "@/forms/attendee/schema";
+import { GuestCheckinFormSchema } from "@/forms/attendee/schema";
 import { usePublicMeeting } from "@/hooks/meetings/public";
 import { generateUUID } from "@/utilities/helpers/id";
 import {
@@ -80,6 +81,8 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
   const [otpError, setOtpError] = useState<string | null>(null);
   const [otpExpiresAt, setOtpExpiresAt] = useState<string | null>(null);
   const [otpEmailSentTo, setOtpEmailSentTo] = useState<string | null>(null);
+  const [otpChannel, setOtpChannel] = useState<OtpChannel>("email");
+  const [otpPhoneSentTo, setOtpPhoneSentTo] = useState<string | null>(null);
   // sessionAttendee is the hydrated attendee record (from either the
   // session-probe at mount, or the freshly-issued one from verify-otp).
   // We hold onto it so feedback/cancel actions know which record they
@@ -108,7 +111,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
   // not pre-fill from any browser-derived signal: FingerprintJS open-source
   // collides on iOS Safari (ITP starves entropy), and any lookup before
   // the email is verified can leak one user's record to another.
-  const attendeeForm = useAttendeeForm({ meetingId });
+  const attendeeForm = useGuestCheckinAttendeeForm({ meetingId });
 
   const { isSubmitting, handleRequestOtp, handleVerifyOtp } =
     useGuestAttendeeCreateUpdate({
@@ -365,7 +368,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
    * reflects the actual confirm/verify tap rather than the much-earlier
    * flow-init time.
    */
-  const buildSubmitValues = (): AttendeeFormSchema => {
+  const buildSubmitValues = (): GuestCheckinFormSchema => {
     const formValues = attendeeForm.hook.getValues();
     return {
       ...formValues,
@@ -403,6 +406,8 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
       setOtpError(null);
       setOtpExpiresAt(result.expiresAt ?? null);
       setOtpEmailSentTo(submitValues.email);
+      setOtpChannel(result.channel ?? "email");
+      setOtpPhoneSentTo(submitValues.phone_number ?? null);
       setCurrentStep("awaiting_otp");
       return;
     }
@@ -423,7 +428,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
   // Step 2 of OTP flow: submit the typed 6-digit code.
   const handleSubmitOtp = async (): Promise<void> => {
     if (otpCode.length !== 6 || !/^\d{6}$/.test(otpCode)) {
-      setOtpError("Enter the 6-digit code from the email.");
+      setOtpError("Enter the 6-digit code we sent you.");
       return;
     }
     setOtpError(null);
@@ -464,6 +469,8 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     if (result.success) {
       setOtpExpiresAt(result.expiresAt ?? null);
       setOtpEmailSentTo(submitValues.email);
+      setOtpChannel(result.channel ?? "email");
+      setOtpPhoneSentTo(submitValues.phone_number ?? null);
       return;
     }
     if (result.statuscode === 409) {
@@ -683,6 +690,8 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
         otpError={otpError}
         otpExpiresAt={otpExpiresAt}
         otpEmailSentTo={otpEmailSentTo}
+        otpChannel={otpChannel}
+        otpPhoneSentTo={otpPhoneSentTo}
         isSubmitting={isSubmitting}
         onSubmit={() => void handleSubmitOtp()}
         onResend={() => void handleResendOtp()}

@@ -5,7 +5,7 @@ import {
   Attendee,
 } from "@/api/services/tendiflow/attendees/types";
 
-import { AttendeeFormSchema } from "./schema";
+import { AttendeeFormSchema, GuestCheckinFormSchema } from "./schema";
 
 export interface AttendeeFormDefaultValuesProps {
   attendee?: Attendee | null;
@@ -37,5 +37,23 @@ export const attendeeFormDefaultValues = ({
     custom_field_responses: attendee?.custom_field_responses || null,
     checkin: attendee?.checkin || null,
     feedback: attendee?.feedback || null,
+  };
+};
+
+export interface GuestCheckinFormDefaultValuesProps {
+  meetingId: string;
+}
+
+/**
+ * Get default values for the guest check-in form (create-only, public flow)
+ * @returns {DefaultValues<GuestCheckinFormSchema>} - default values for guest check-in form
+ */
+export const guestCheckinFormDefaultValues = ({
+  meetingId,
+}: GuestCheckinFormDefaultValuesProps): DefaultValues<GuestCheckinFormSchema> => {
+  return {
+    ...attendeeFormDefaultValues({ meetingId }),
+    phone_number: "",
+    channel: "email" as const,
   };
 };

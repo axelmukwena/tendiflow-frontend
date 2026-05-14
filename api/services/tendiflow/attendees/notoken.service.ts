@@ -20,8 +20,8 @@ import { getAttendeeApiUrlV1 } from "./utilities";
 export class AttendeeNoTokenService extends TendiflowNoTokenApiService {
   /**
    * Request a one-time check-in code for a guest attendee. The backend
-   * validates the proposed check-in and emails a 6-digit code; nothing is
-   * written until verify-otp succeeds.
+   * validates the proposed check-in and sends a 6-digit code to the chosen
+   * channel (email or SMS); nothing is written until verify-otp succeeds.
    */
   async requestGuestCheckinOtp({
     organisation_id,
@@ -41,7 +41,7 @@ export class AttendeeNoTokenService extends TendiflowNoTokenApiService {
       if (isRequestSuccess(res.status) && "status" in res.data) {
         return {
           success: true,
-          message: "OTP sent to the attendee's email",
+          message: "OTP sent to the attendee",
           data: res.data,
           statuscode: res.status,
         };

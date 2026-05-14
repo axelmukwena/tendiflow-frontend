@@ -3,7 +3,12 @@ import { z } from "zod";
 import { AttendanceStatus } from "@/api/services/tendiflow/attendees/types";
 import { CustomFieldType } from "@/api/services/tendiflow/meetings/types";
 
-import { PHONE_NUMBER_OPTIONAL_SCHEMA } from "../phonenumber";
+import { PHONE_NUMBER_OPTIONAL_SCHEMA, PHONE_NUMBER_REQUIRED_SCHEMA } from "../phonenumber";
+
+// Zod v4: use .optional() + default-value injection in defaults.ts to avoid
+// the input/output type divergence that .default() creates and that breaks
+// react-hook-form's zodResolver typing.
+export const OTP_CHANNEL = z.enum(["email", "sms"]).optional();
 
 // Attendee Checkin Location Schema
 const ATTENDEE_CHECKIN_LOCATION_SCHEMA = z.object({
@@ -115,3 +120,12 @@ export const ATTENDEE_FORM_SCHEMA = ATTENDEE_BASE_SCHEMA.extend({
 );
 
 export type AttendeeFormSchema = z.infer<typeof ATTENDEE_FORM_SCHEMA>;
+
+// Guest check-in form schema — extends the admin schema with required phone
+// and an OTP channel selector. Only used by the public check-in flow.
+export const GUEST_CHECKIN_FORM_SCHEMA = ATTENDEE_FORM_SCHEMA.extend({
+  phone_number: PHONE_NUMBER_REQUIRED_SCHEMA,
+  channel: OTP_CHANNEL,
+});
+
+export type GuestCheckinFormSchema = z.infer<typeof GUEST_CHECKIN_FORM_SCHEMA>;

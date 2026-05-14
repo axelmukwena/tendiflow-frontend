@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { AttendeeNoTokenService } from "@/api/services/tendiflow/attendees/notoken.service";
-import { AttendeeCreateGuest } from "@/api/services/tendiflow/attendees/types";
+import { AttendeeGuestCheckinOtpRequestBody } from "@/api/services/tendiflow/attendees/types";
 import { getHeadersNextRequest } from "@/api/utilities";
 import { verifyCsrfToken } from "@/utilities/helpers/csrf";
 import { getErrorMessage } from "@/utilities/helpers/errors";
@@ -29,7 +29,7 @@ export const POST = async (
   try {
     const params = await context.params;
     const { organisationId } = params;
-    const body: AttendeeCreateGuest = await req.json();
+    const body: AttendeeGuestCheckinOtpRequestBody = await req.json();
 
     if (!organisationId) {
       return NextResponse.json(

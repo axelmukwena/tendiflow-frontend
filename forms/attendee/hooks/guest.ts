@@ -3,18 +3,18 @@
 import { useState } from "react";
 
 import { AttendeeClientService } from "@/api/services/tendiflow/attendees/client.service";
-import { Attendee } from "@/api/services/tendiflow/attendees/types";
+import { Attendee, OtpChannel } from "@/api/services/tendiflow/attendees/types";
 import { getErrorMessage } from "@/utilities/helpers/errors";
 import { notify } from "@/utilities/helpers/toaster";
 
 import { getGuestAttendeeCreateData } from "../data";
-import { AttendeeFormSchema } from "../schema";
-import { UseAttendeeForm } from "../types";
+import { GuestCheckinFormSchema } from "../schema";
+import { UseGuestCheckinAttendeeForm } from "../types";
 
 const clientService = new AttendeeClientService();
 
 interface UseGuestAttendeeCreateUpdateProps {
-  attendeeForm: UseAttendeeForm;
+  attendeeForm: UseGuestCheckinAttendeeForm;
   organisationId: string;
   onSuccess?: (attendee: Attendee) => void;
   /**
@@ -31,6 +31,7 @@ export interface RequestOtpResult {
   statuscode?: number;
   expiresAt?: string;
   expiresInMinutes?: number;
+  channel?: OtpChannel;
   error?: string;
 }
 
@@ -48,9 +49,9 @@ interface UseGuestAttendeeCreateUpdate {
    * validates and emails a 6-digit OTP. Nothing is written to the
    * attendees collection until handleVerifyOtp succeeds.
    */
-  handleRequestOtp: (values: AttendeeFormSchema) => Promise<RequestOtpResult>;
+  handleRequestOtp: (values: GuestCheckinFormSchema) => Promise<RequestOtpResult>;
   handleVerifyOtp: (
-    values: AttendeeFormSchema,
+    values: GuestCheckinFormSchema,
     code: string,
   ) => Promise<VerifyOtpResult>;
 }
@@ -64,21 +65,23 @@ export const useGuestAttendeeCreateUpdate = ({
 
   /**
    * Step 1 of the OTP flow. Submits the full form to /request-otp; the
-   * backend validates and (on success) emails a 6-digit code.
+   * backend validates and (on success) sends a 6-digit code via the chosen
+   * channel (email or SMS).
    *
-   * Toasts only on unexpected errors. 409 (already checked in) is
-   * surfaced to the caller via statuscode so the flow view can route to
-   * its own screen rather than show a generic error.
+   * Toasts only on unexpected errors. 409 (already checked in) and 429
+   * (rate limited) are surfaced to the caller via statuscode so the flow
+   * view can route appropriately. 429 also shows a friendly toast.
    */
   const handleRequestOtp = async (
-    values: AttendeeFormSchema,
+    values: GuestCheckinFormSchema,
   ): Promise<RequestOtpResult> => {
     setIsSubmitting(true);
     try {
-      const data = getGuestAttendeeCreateData({ values });
+      const attendee = getGuestAttendeeCreateData({ values });
+      const channel: OtpChannel = values.channel ?? "email";
       const response = await clientService.requestGuestCheckinOtp(
         organisationId,
-        data,
+        { channel, attendee },
       );
       if (response.success && response.data) {
         return {
@@ -86,10 +89,32 @@ export const useGuestAttendeeCreateUpdate = ({
           statuscode: response.statuscode,
           expiresAt: response.data.expires_at,
           expiresInMinutes: response.data.expires_in_minutes,
+          channel: response.data.channel,
         };
       }
       const message =
         response.message || "Could not send the verification code.";
+      if (response.statuscode === 429) {
+        // Extract retry_after_seconds from the backend message:
+        // "Too many OTP requests. Retry in 3600 seconds."
+        let toastMessage =
+          "Too many requests. Please wait before requesting another code.";
+        const match = message.match(/Retry in (\d+) seconds/);
+        if (match) {
+          const seconds = parseInt(match[1], 10);
+          const minutes = Math.max(1, Math.ceil(seconds / 60));
+          toastMessage = `You've requested too many codes. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
+        }
+        notify({
+          type: "error",
+          message: toastMessage,
+        });
+        return {
+          success: false,
+          statuscode: response.statuscode,
+          error: message,
+        };
+      }
       if (response.statuscode !== 409) {
         notify({ message, type: "error" });
       }
@@ -124,7 +149,7 @@ export const useGuestAttendeeCreateUpdate = ({
    * already-checked-in routing.
    */
   const handleVerifyOtp = async (
-    values: AttendeeFormSchema,
+    values: GuestCheckinFormSchema,
     code: string,
   ): Promise<VerifyOtpResult> => {
     setIsSubmitting(true);
@@ -132,7 +157,7 @@ export const useGuestAttendeeCreateUpdate = ({
       const data = getGuestAttendeeCreateData({ values });
       const response = await clientService.verifyGuestCheckinOtp(
         organisationId,
-        { code, attendee: data },
+        { code, channel: values.channel ?? "email", attendee: data },
       );
       if (response.success && response.data) {
         notify({

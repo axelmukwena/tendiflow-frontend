@@ -1,7 +1,7 @@
 import {
   Attendee,
-  AttendeeCreateGuestClient,
   AttendeeFeedbackCreateClient,
+  AttendeeGuestCheckinOtpRequestBody,
   AttendeeGuestCheckinOtpRequestResponse,
   AttendeeGuestCheckinOtpVerifyBody,
 } from "@/api/services/tendiflow/attendees/types";
@@ -22,7 +22,7 @@ export class AttendeeClientService {
    */
   async requestGuestCheckinOtp(
     organisationId: string,
-    data: AttendeeCreateGuestClient,
+    data: AttendeeGuestCheckinOtpRequestBody,
   ): Promise<DataServiceResponse<AttendeeGuestCheckinOtpRequestResponse | null>> {
     try {
       const headers = {
