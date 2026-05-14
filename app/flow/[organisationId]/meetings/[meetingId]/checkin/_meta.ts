@@ -7,13 +7,14 @@ export interface MeetingForMeta {
   title: string;
   start_datetime: string;
   end_datetime: string;
+  timezone: string;
   address: string | null;
   organisation_name: string;
 }
 
 type PublicMeetingResponse = Pick<
   Meeting,
-  "id" | "title" | "start_datetime" | "end_datetime" | "address" | "organisation"
+  "id" | "title" | "start_datetime" | "end_datetime" | "timezone" | "address" | "organisation"
 >;
 
 /**
@@ -43,6 +44,7 @@ export async function fetchMeetingForMeta(
       title: meeting.title,
       start_datetime: meeting.start_datetime,
       end_datetime: meeting.end_datetime,
+      timezone: meeting.timezone,
       address: meeting.address,
       organisation_name: meeting.organisation?.name ?? "Tendiflow",
     };

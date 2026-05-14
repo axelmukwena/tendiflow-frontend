@@ -9,31 +9,50 @@ export const alt = "Meeting check-in";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+const SITE_BASE_URL = ENVIRONMENT_VARIABLES.NEXT_PUBLIC_SITE_BASE_URL.replace(
+  /\/$/,
+  "",
+);
+
 async function loadFont(filename: string): Promise<ArrayBuffer> {
-  const baseUrl = ENVIRONMENT_VARIABLES.NEXT_PUBLIC_SITE_BASE_URL.replace(
-    /\/$/,
-    "",
-  );
-  const res = await fetch(`${baseUrl}/static/fonts/${filename}`, {
+  const res = await fetch(`${SITE_BASE_URL}/static/fonts/${filename}`, {
     next: { revalidate: 86400 },
   });
+  if (!res.ok) {
+    throw new Error(`Font fetch failed (${filename}): ${res.status}`);
+  }
   return res.arrayBuffer();
 }
 
-function formatDateRange(startISO: string, endISO: string): string {
-  const start = new Date(startISO);
-  const end = new Date(endISO);
-  const dateFmt = new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const timeFmt = new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-  return `${dateFmt.format(start)} · ${timeFmt.format(start)} – ${timeFmt.format(end)}`;
+/**
+ * Format the meeting's start datetime in its own timezone — the Edge
+ * runtime would otherwise format in UTC, which misrepresents the local
+ * meeting time for any non-UTC timezone. Mirrors the date shape used
+ * by page.tsx's description text for consistency between the og:image
+ * and og:description fields.
+ */
+function formatMeetingStart(startISO: string, timezone: string): string {
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: timezone,
+    }).format(new Date(startISO));
+  } catch {
+    // Invalid timezone string — fall back to UTC rather than throwing.
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date(startISO));
+  }
 }
 
 interface ImageProps {
@@ -47,17 +66,32 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
     meetingId,
   );
 
-  const [interBold, interMedium] = await Promise.all([
-    loadFont("Inter-Bold.ttf"),
-    loadFont("Inter-Medium.ttf"),
-  ]);
+  // Load fonts in parallel. If either fails (e.g. on Edge cold-start before
+  // static assets propagate, or a misconfigured base URL) fall back to
+  // Satori's system font rather than returning a 5xx — a 5xx response gets
+  // cached by Slack/Twitter and poisons the share preview.
+  let fonts:
+    | { name: string; data: ArrayBuffer; weight: 400 | 500 | 700; style: "normal" }[]
+    | undefined;
+  try {
+    const [interBold, interMedium] = await Promise.all([
+      loadFont("Inter-Bold.ttf"),
+      loadFont("Inter-Medium.ttf"),
+    ]);
+    fonts = [
+      { name: "Inter", data: interBold, weight: 700, style: "normal" },
+      { name: "Inter", data: interMedium, weight: 500, style: "normal" },
+    ];
+  } catch (err) {
+    console.error("[opengraph-image] font load failed:", err);
+    fonts = undefined;
+  }
 
   const title = meeting?.title ?? "Meeting check-in";
   const org = meeting?.organisation_name ?? "Tendiflow";
-  const date =
-    meeting != null
-      ? formatDateRange(meeting.start_datetime, meeting.end_datetime)
-      : "";
+  const date = meeting
+    ? formatMeetingStart(meeting.start_datetime, meeting.timezone)
+    : "";
   const address = meeting?.address ?? "";
 
   return new ImageResponse(
@@ -66,6 +100,7 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
         style={{
           width: "100%",
           height: "100%",
+          position: "relative",
           display: "flex",
           flexDirection: "column",
           padding: "64px",
@@ -144,12 +179,6 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
         </div>
       </div>
     ),
-    {
-      ...size,
-      fonts: [
-        { name: "Inter", data: interBold, weight: 700, style: "normal" },
-        { name: "Inter", data: interMedium, weight: 500, style: "normal" },
-      ],
-    },
+    fonts ? { ...size, fonts } : { ...size },
   );
 }
