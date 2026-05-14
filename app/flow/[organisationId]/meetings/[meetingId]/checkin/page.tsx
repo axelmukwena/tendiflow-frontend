@@ -34,9 +34,14 @@ export async function generateMetadata({
     utc: meeting.start_datetime,
     timezone: meeting.timezone,
   });
-  const description = [dateText, meeting.address]
-    .filter(Boolean)
-    .join(" · ");
+  // Two-part description: factual context (when/where), then action +
+  // brand. Newlines often get stripped to whitespace by chat-app
+  // unfurlers (WhatsApp/Slack/iMessage) — kept here for the minority
+  // that respect them (Facebook in particular).
+  const factsLine = [dateText, meeting.address].filter(Boolean).join(" · ");
+  const tagline =
+    "Tap to check in. Tendiflow tracks meeting attendance digitally.";
+  const description = factsLine ? `${factsLine}\n\n${tagline}` : tagline;
   const baseUrl = ENVIRONMENT_VARIABLES.NEXT_PUBLIC_SITE_BASE_URL.replace(
     /\/$/,
     "",
