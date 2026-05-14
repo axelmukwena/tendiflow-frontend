@@ -157,7 +157,7 @@ export const useGuestAttendeeCreateUpdate = ({
       const data = getGuestAttendeeCreateData({ values });
       const response = await clientService.verifyGuestCheckinOtp(
         organisationId,
-        { code, attendee: data },
+        { code, channel: values.channel ?? "email", attendee: data },
       );
       if (response.success && response.data) {
         notify({

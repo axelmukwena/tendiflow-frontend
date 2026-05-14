@@ -254,6 +254,10 @@ export interface AttendeeGuestCheckinOtpRequestResponse {
 
 export interface AttendeeGuestCheckinOtpVerifyBody {
   code: string;
+  // Tells the backend which OTP backend to validate against (local Verification
+  // table for email vs Twilio Verify for SMS). Must match the channel that was
+  // used when request-otp was called.
+  channel: OtpChannel;
   attendee: AttendeeCreateGuest;
 }
 
