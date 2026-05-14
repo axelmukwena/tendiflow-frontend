@@ -15,9 +15,9 @@ import {
   validateCheckinLocation,
   validateCheckinTiming,
 } from "@/forms/attendee/helpers";
-import { useAttendeeForm } from "@/forms/attendee/hooks/form";
+import { useGuestCheckinAttendeeForm } from "@/forms/attendee/hooks/form";
 import { useGuestAttendeeCreateUpdate } from "@/forms/attendee/hooks/guest";
-import { AttendeeFormSchema } from "@/forms/attendee/schema";
+import { GuestCheckinFormSchema } from "@/forms/attendee/schema";
 import { usePublicMeeting } from "@/hooks/meetings/public";
 import { generateUUID } from "@/utilities/helpers/id";
 import {
@@ -108,7 +108,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
   // not pre-fill from any browser-derived signal: FingerprintJS open-source
   // collides on iOS Safari (ITP starves entropy), and any lookup before
   // the email is verified can leak one user's record to another.
-  const attendeeForm = useAttendeeForm({ meetingId });
+  const attendeeForm = useGuestCheckinAttendeeForm({ meetingId });
 
   const { isSubmitting, handleRequestOtp, handleVerifyOtp } =
     useGuestAttendeeCreateUpdate({
@@ -365,7 +365,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
    * reflects the actual confirm/verify tap rather than the much-earlier
    * flow-init time.
    */
-  const buildSubmitValues = (): AttendeeFormSchema => {
+  const buildSubmitValues = (): GuestCheckinFormSchema => {
     const formValues = attendeeForm.hook.getValues();
     return {
       ...formValues,

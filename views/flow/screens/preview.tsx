@@ -6,14 +6,14 @@ import {
   AttendeeCheckinLocation,
 } from "@/api/services/tendiflow/attendees/types";
 import { Meeting } from "@/api/services/tendiflow/meetings/types";
-import { UseAttendeeForm } from "@/forms/attendee/types";
+import { UseGuestCheckinAttendeeForm } from "@/forms/attendee/types";
 import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 
 import { Footer } from "../footer";
 
 interface PreviewScreenProps {
   meeting: Meeting;
-  attendeeForm: UseAttendeeForm;
+  attendeeForm: UseGuestCheckinAttendeeForm;
   metadata: {
     locationInfo: AttendeeCheckinLocation;
     deviceInfo: AttendeeCheckinDevice;

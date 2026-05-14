@@ -8,13 +8,13 @@ import { getErrorMessage } from "@/utilities/helpers/errors";
 import { notify } from "@/utilities/helpers/toaster";
 
 import { getGuestAttendeeCreateData } from "../data";
-import { AttendeeFormSchema } from "../schema";
-import { UseAttendeeForm } from "../types";
+import { GuestCheckinFormSchema } from "../schema";
+import { UseGuestCheckinAttendeeForm } from "../types";
 
 const clientService = new AttendeeClientService();
 
 interface UseGuestAttendeeCreateUpdateProps {
-  attendeeForm: UseAttendeeForm;
+  attendeeForm: UseGuestCheckinAttendeeForm;
   organisationId: string;
   onSuccess?: (attendee: Attendee) => void;
   /**
@@ -48,9 +48,9 @@ interface UseGuestAttendeeCreateUpdate {
    * validates and emails a 6-digit OTP. Nothing is written to the
    * attendees collection until handleVerifyOtp succeeds.
    */
-  handleRequestOtp: (values: AttendeeFormSchema) => Promise<RequestOtpResult>;
+  handleRequestOtp: (values: GuestCheckinFormSchema) => Promise<RequestOtpResult>;
   handleVerifyOtp: (
-    values: AttendeeFormSchema,
+    values: GuestCheckinFormSchema,
     code: string,
   ) => Promise<VerifyOtpResult>;
 }
@@ -71,7 +71,7 @@ export const useGuestAttendeeCreateUpdate = ({
    * its own screen rather than show a generic error.
    */
   const handleRequestOtp = async (
-    values: AttendeeFormSchema,
+    values: GuestCheckinFormSchema,
   ): Promise<RequestOtpResult> => {
     setIsSubmitting(true);
     try {
@@ -124,7 +124,7 @@ export const useGuestAttendeeCreateUpdate = ({
    * already-checked-in routing.
    */
   const handleVerifyOtp = async (
-    values: AttendeeFormSchema,
+    values: GuestCheckinFormSchema,
     code: string,
   ): Promise<VerifyOtpResult> => {
     setIsSubmitting(true);

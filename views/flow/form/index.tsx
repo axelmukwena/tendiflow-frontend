@@ -15,7 +15,7 @@ import {
   FormSection,
 } from "@/components/ui/form";
 import { MultilineTextView } from "@/components/ui/view";
-import { UseAttendeeForm } from "@/forms/attendee/types";
+import { UseGuestCheckinAttendeeForm } from "@/forms/attendee/types";
 
 interface GuestAttendeeFormProps {
   meetingId: string;
@@ -23,7 +23,7 @@ interface GuestAttendeeFormProps {
   onCancel?: () => void;
   isSubmitting: boolean;
   handleOnSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
-  attendeeForm: UseAttendeeForm;
+  attendeeForm: UseGuestCheckinAttendeeForm;
 }
 
 export const GuestAttendeeForm: FC<GuestAttendeeFormProps> = ({

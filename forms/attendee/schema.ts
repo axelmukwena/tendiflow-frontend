@@ -4,8 +4,9 @@ import { z } from "zod";
 import { AttendanceStatus } from "@/api/services/tendiflow/attendees/types";
 import { CustomFieldType } from "@/api/services/tendiflow/meetings/types";
 
+import { PHONE_NUMBER_OPTIONAL_SCHEMA } from "../phonenumber";
 
-const PHONE_NUMBER_E164_REQUIRED = z
+export const PHONE_NUMBER_E164_REQUIRED = z
   .string()
   .min(1, "Phone number is required")
   .refine(
@@ -13,7 +14,7 @@ const PHONE_NUMBER_E164_REQUIRED = z
     "Enter a valid phone number with country code",
   );
 
-const OTP_CHANNEL = z.enum(["email", "sms"]).optional();
+export const OTP_CHANNEL = z.enum(["email", "sms"]).optional();
 
 // Attendee Checkin Location Schema
 const ATTENDEE_CHECKIN_LOCATION_SCHEMA = z.object({
@@ -91,7 +92,7 @@ const ATTENDEE_BASE_SCHEMA = z.object({
     .string()
     .min(1, "Last name is required")
     .max(100, "Last name is too long"),
-  phone_number: PHONE_NUMBER_E164_REQUIRED,
+  phone_number: PHONE_NUMBER_OPTIONAL_SCHEMA,
   organisation_name: z
     .string()
     .max(255, "Organisation name is too long")
@@ -110,7 +111,6 @@ export const ATTENDEE_FORM_SCHEMA = ATTENDEE_BASE_SCHEMA.extend({
   attendance_status: z.enum(AttendanceStatus).optional(),
   checkin: ATTENDEE_CHECKIN_INFO_SCHEMA.optional(),
   feedback: ATTENDEE_FEEDBACK_INFO_SCHEMA.optional(),
-  channel: OTP_CHANNEL,
 }).refine(
   (data) => {
     // If this is for registration/creation, meeting_id should be provided
@@ -126,3 +126,12 @@ export const ATTENDEE_FORM_SCHEMA = ATTENDEE_BASE_SCHEMA.extend({
 );
 
 export type AttendeeFormSchema = z.infer<typeof ATTENDEE_FORM_SCHEMA>;
+
+// Guest check-in form schema — extends the admin schema with required phone
+// and an OTP channel selector. Only used by the public check-in flow.
+export const GUEST_CHECKIN_FORM_SCHEMA = ATTENDEE_FORM_SCHEMA.extend({
+  phone_number: PHONE_NUMBER_E164_REQUIRED,
+  channel: OTP_CHANNEL,
+});
+
+export type GuestCheckinFormSchema = z.infer<typeof GUEST_CHECKIN_FORM_SCHEMA>;

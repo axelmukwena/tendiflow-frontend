@@ -4,7 +4,7 @@ import { FC } from "react";
 import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { LogoVertical } from "@/components/logos/vertical";
 import { CheckinValidationResult } from "@/forms/attendee/helpers";
-import { UseAttendeeForm } from "@/forms/attendee/types";
+import { UseGuestCheckinAttendeeForm } from "@/forms/attendee/types";
 import { getFormattedDateAndTime } from "@/utilities/helpers/date";
 
 import { Footer } from "../footer";
@@ -13,7 +13,7 @@ import { GuestAttendeeForm } from "../form";
 interface FormScreenProps {
   meeting: Meeting;
   meetingId: string;
-  attendeeForm: UseAttendeeForm;
+  attendeeForm: UseGuestCheckinAttendeeForm;
   validationResult: CheckinValidationResult | null;
   isSubmitting: boolean;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
