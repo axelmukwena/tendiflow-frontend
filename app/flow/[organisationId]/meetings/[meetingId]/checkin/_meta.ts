@@ -1,3 +1,5 @@
+// Underscore prefix marks this as a private module Next.js will not expose as a route.
+import { Meeting } from "@/api/services/tendiflow/meetings/types";
 import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
 
 export interface MeetingForMeta {
@@ -9,14 +11,10 @@ export interface MeetingForMeta {
   organisation_name: string;
 }
 
-interface BackendMeetingResponse {
-  id: string;
-  title: string;
-  start_datetime: string;
-  end_datetime: string;
-  address: string | null;
-  organisation?: { name?: string | null } | null;
-}
+type PublicMeetingResponse = Pick<
+  Meeting,
+  "id" | "title" | "start_datetime" | "end_datetime" | "address" | "organisation"
+>;
 
 /**
  * Server-side fetch of the public meeting record used by both
@@ -39,16 +37,17 @@ export async function fetchMeetingForMeta(
       next: { revalidate: 300 },
     });
     if (!res.ok) return null;
-    const meeting = (await res.json()) as BackendMeetingResponse;
+    const meeting = (await res.json()) as PublicMeetingResponse;
     return {
       id: meeting.id,
       title: meeting.title,
       start_datetime: meeting.start_datetime,
       end_datetime: meeting.end_datetime,
-      address: meeting.address ?? null,
+      address: meeting.address,
       organisation_name: meeting.organisation?.name ?? "Tendiflow",
     };
-  } catch {
+  } catch (err) {
+    console.error("[fetchMeetingForMeta] fetch failed:", err);
     return null;
   }
 }
