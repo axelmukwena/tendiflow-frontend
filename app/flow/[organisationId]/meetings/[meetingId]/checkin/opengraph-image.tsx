@@ -91,7 +91,7 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
             color: "#a3a3a3",
           }}
         >
-          Tendiflow
+          Tendiflow · Meeting Check-in
         </div>
 
         <div

@@ -29,7 +29,7 @@ export async function generateMetadata({
     return { robots };
   }
 
-  const title = `${meeting.title} — ${meeting.organisation_name}`;
+  const title = `Check in: ${meeting.title} — ${meeting.organisation_name}`;
   const dateText = getFormattedDateAndTimeInTimezone({
     utc: meeting.start_datetime,
     timezone: meeting.timezone,
