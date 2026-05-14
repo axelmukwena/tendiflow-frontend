@@ -168,6 +168,20 @@ export function validateCheckinLocation(
     };
   }
 
+  const requiredRadiusMeters = meeting.settings.checkin_radius_meters;
+
+  // No radius configured = no radius check (matches backend's
+  // is_within_checkin_radius which returns True when radius is null/0).
+  // The location is still captured for record-keeping by the caller.
+  if (!requiredRadiusMeters) {
+    return {
+      isWithinRadius: true,
+      distanceMeters: null,
+      requiredRadiusMeters: null,
+      message: null,
+    };
+  }
+
   // Calculate distance
   const distanceMeters = calculateDistance(
     userLocation.latitude,
@@ -175,8 +189,6 @@ export function validateCheckinLocation(
     meeting.coordinates.latitude,
     meeting.coordinates.longitude,
   );
-
-  const requiredRadiusMeters = meeting.settings.checkin_radius_meters || 100; // Default 100m
 
   const isWithinRadius = distanceMeters <= requiredRadiusMeters;
 
