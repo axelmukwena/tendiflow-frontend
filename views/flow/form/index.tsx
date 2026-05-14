@@ -8,12 +8,17 @@ import { Spinner } from "@/components/loaders/spinner";
 import { Button } from "@/components/ui/button";
 import {
   Form,
+  FormControl,
   FormErrorMessage,
   FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   FormProvider,
   FormRow,
   FormSection,
 } from "@/components/ui/form";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { MultilineTextView } from "@/components/ui/view";
 import { UseGuestCheckinAttendeeForm } from "@/forms/attendee/types";
 
@@ -92,26 +97,72 @@ export const GuestAttendeeForm: FC<GuestAttendeeFormProps> = ({
               )}
             />
           </FormRow>
-        </FormSection>
 
-        <FormSection title="Additional Information (Optional)">
           <FormRow>
             <FormField
               control={control}
               name="phone_number"
               render={({ field }) => (
-                <TextField
-                  field={field}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  label="Phone Number"
-                  type="tel"
-                  helpText="Your contact phone number"
-                />
+                <FormItem>
+                  <FormLabel>Phone Number *</FormLabel>
+                  <FormControl>
+                    <PhoneInput
+                      value={field.value ?? ""}
+                      onChange={(v: string | undefined) =>
+                        field.onChange(v ?? "")
+                      }
+                      onBlur={field.onBlur}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
           </FormRow>
 
+          <FormRow>
+            <FormField
+              control={control}
+              name="channel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Where should we send your verification code? *
+                  </FormLabel>
+                  <div className="flex gap-4 pt-0.5">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={field.name}
+                        value="email"
+                        checked={field.value === "email"}
+                        onChange={() => field.onChange("email")}
+                        onBlur={field.onBlur}
+                        className="accent-primary"
+                      />
+                      <span className="text-sm">Email</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={field.name}
+                        value="sms"
+                        checked={field.value === "sms"}
+                        onChange={() => field.onChange("sms")}
+                        onBlur={field.onBlur}
+                        className="accent-primary"
+                      />
+                      <span className="text-sm">SMS</span>
+                    </label>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </FormRow>
+        </FormSection>
+
+        <FormSection title="Additional Information (Optional)">
           <FormRow>
             <FormField
               control={control}
