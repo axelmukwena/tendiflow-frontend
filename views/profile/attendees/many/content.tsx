@@ -3,11 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 
-import {
-  Attendee,
-  AttendeeSortBy,
-} from "@/api/services/tendiflow/attendees/types";
-import { OrderBy } from "@/api/services/tendiflow/types/general";
+import { Attendee } from "@/api/services/tendiflow/attendees/types";
 import { TablePagination } from "@/components/pagination/table";
 import { useAttendeeUsersMany } from "@/hooks/profile/attendee/many";
 import { useAttendeeUserPagination } from "@/hooks/profile/attendee/pagination";
@@ -28,6 +24,7 @@ export const ProfileAttendeesContent: FC<ProfileAttendeesContentProps> = () => {
     total,
     handlePageChange,
     handleLimitChange,
+    handleSort,
     setTotal,
   } = useAttendeeUserPagination();
 
@@ -40,10 +37,6 @@ export const ProfileAttendeesContent: FC<ProfileAttendeesContentProps> = () => {
       page,
       setTotal,
     });
-
-  const handleSort = (newSortBy: AttendeeSortBy, newOrderBy: OrderBy): void => {
-    console.log("Sort requested:", { newSortBy, newOrderBy });
-  };
 
   const handleRowClick = (attendee: Attendee): void => {
     router.push(`/attendances/${attendee.id}`);

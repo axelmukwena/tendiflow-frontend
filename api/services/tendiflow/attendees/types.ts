@@ -26,6 +26,8 @@ export enum AttendeeSortBy {
   LAST_NAME = "last_name",
   ATTENDANCE_STATUS = "attendance_status",
   CHECKIN_DATETIME = "checkin.checkin_datetime",
+  MEETING_TITLE = "meeting.title",
+  MEETING_START_DATETIME = "meeting.start_datetime",
 }
 
 export enum ApiActionAttendee {

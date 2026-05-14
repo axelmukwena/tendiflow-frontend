@@ -15,13 +15,16 @@ interface UseAttendeeUserPagination {
   total: number;
   handlePageChange: (event: { selected: number }) => void;
   handleLimitChange: (value: string) => void;
+  handleSort: (sortBy: AttendeeSortBy, orderBy: OrderBy) => void;
   setTotal: (total: number) => void;
 }
 
 export const useAttendeeUserPagination = (): UseAttendeeUserPagination => {
   const [searchRaw] = useQueryParam<string>(QueryParamKey.SEARCH);
   const debouncedSearch = useDebounce(searchRaw || "", 1000);
-  const [sortBy] = useQueryParam<AttendeeSortBy>(QueryParamKey.SORT_BY);
+  const [sortBy, , setSortAndOrderQuery] = useQueryParam<AttendeeSortBy>(
+    QueryParamKey.SORT_BY,
+  );
   const [orderBy] = useQueryParam<OrderBy>(QueryParamKey.ORDER_BY);
   const [limitQuery] = useQueryParam<string>(QueryParamKey.LIMIT);
   const [pageQuery, setPageQuery, setLimitPageQuery] = useQueryParam<string>(
@@ -54,6 +57,20 @@ export const useAttendeeUserPagination = (): UseAttendeeUserPagination => {
     });
   };
 
+  // Sorting updates `sort_by` + `order_by` in the URL and resets the page
+  // so the user lands on page 1 of the new ordering (rather than the
+  // now-misaligned slice of a different sort).
+  const handleSort = (
+    newSortBy: AttendeeSortBy,
+    newOrderBy: OrderBy,
+  ): void => {
+    setSortAndOrderQuery({
+      [QueryParamKey.SORT_BY]: newSortBy,
+      [QueryParamKey.ORDER_BY]: newOrderBy,
+      [QueryParamKey.PAGE]: "",
+    });
+  };
+
   useEffect(() => {
     const activeItems = document.querySelectorAll(".page-item:not(.disabled)");
     if (activeItems.length) {
@@ -72,6 +89,7 @@ export const useAttendeeUserPagination = (): UseAttendeeUserPagination => {
     total,
     handlePageChange,
     handleLimitChange,
+    handleSort,
     setTotal,
   };
 };

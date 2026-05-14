@@ -35,15 +35,15 @@ export const AttendeeTableHeader: FC<AttendeeTableHeaderProps> = ({
       <TableRow>
         <TableHead
           className={`cursor-pointer hover:bg-gray-50 ${onSort ? "select-none" : ""}`}
-          onClick={() => handleSort(AttendeeSortBy.FIRST_NAME)}
+          onClick={() => handleSort(AttendeeSortBy.MEETING_TITLE)}
         >
-          Meeting & Organization {getSortIcon(AttendeeSortBy.FIRST_NAME)}
+          Meeting & Organization {getSortIcon(AttendeeSortBy.MEETING_TITLE)}
         </TableHead>
         <TableHead
           className={`cursor-pointer hover:bg-gray-50 ${onSort ? "select-none" : ""}`}
-          onClick={() => handleSort(AttendeeSortBy.CREATED_AT)}
+          onClick={() => handleSort(AttendeeSortBy.MEETING_START_DATETIME)}
         >
-          Meeting Date {getSortIcon(AttendeeSortBy.CREATED_AT)}
+          Meeting Date {getSortIcon(AttendeeSortBy.MEETING_START_DATETIME)}
         </TableHead>
         <TableHead>Location</TableHead>
         <TableHead
@@ -58,7 +58,12 @@ export const AttendeeTableHeader: FC<AttendeeTableHeaderProps> = ({
         >
           Check-in Time {getSortIcon(AttendeeSortBy.CHECKIN_DATETIME)}
         </TableHead>
-        <TableHead>Registered</TableHead>
+        <TableHead
+          className={`cursor-pointer hover:bg-gray-50 ${onSort ? "select-none" : ""}`}
+          onClick={() => handleSort(AttendeeSortBy.CREATED_AT)}
+        >
+          Registered {getSortIcon(AttendeeSortBy.CREATED_AT)}
+        </TableHead>
       </TableRow>
     </TableHeader>
   );
