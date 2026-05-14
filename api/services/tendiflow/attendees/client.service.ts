@@ -1,6 +1,7 @@
 import {
   Attendee,
   AttendeeCreateGuestClient,
+  AttendeeFeedbackCreateClient,
   AttendeeGuestCheckinOtpRequestResponse,
   AttendeeGuestCheckinOtpVerifyBody,
 } from "@/api/services/tendiflow/attendees/types";
@@ -111,6 +112,76 @@ export class AttendeeClientService {
       return {
         success: false,
         message: `Failed to read check-in session: ${error}`,
+        data: null,
+        statuscode: 500,
+      };
+    }
+  }
+
+  /**
+   * Cancel the caller's own guest check-in. The backend clears the
+   * tendiflow_checkin_session cookie on success — the proxy forwards
+   * that Set-Cookie verbatim, so credentials: include is required so
+   * the cookie removal actually lands.
+   */
+  async cancelGuestCheckin(
+    organisationId: string,
+    meetingId: string,
+  ): Promise<DataServiceResponse<Attendee | null>> {
+    try {
+      const headers = {
+        [HeaderKey.CONTENT_TYPE]: "application/json",
+        [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
+      };
+      const qs = new URLSearchParams({ meeting_id: meetingId }).toString();
+      const response = await fetch(
+        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/checkin/cancel?${qs}`,
+        {
+          method: "PUT",
+          headers,
+          credentials: "include",
+        },
+      );
+      return await response.json();
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to cancel check-in: ${error}`,
+        data: null,
+        statuscode: 500,
+      };
+    }
+  }
+
+  /**
+   * Submit feedback for the caller's own check-in. Cookie identifies
+   * which attendee record gets the feedback attached.
+   */
+  async submitGuestCheckinFeedback(
+    organisationId: string,
+    meetingId: string,
+    data: AttendeeFeedbackCreateClient,
+  ): Promise<DataServiceResponse<Attendee | null>> {
+    try {
+      const headers = {
+        [HeaderKey.CONTENT_TYPE]: "application/json",
+        [HeaderKey.X_TENDIFLOW_CSRF_TOKEN]: await getCsrfToken(),
+      };
+      const qs = new URLSearchParams({ meeting_id: meetingId }).toString();
+      const response = await fetch(
+        `${this.baseUrl}/organisations/${organisationId}/attendees/guest/checkin/feedback?${qs}`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(data),
+          credentials: "include",
+        },
+      );
+      return await response.json();
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to submit feedback: ${error}`,
         data: null,
         statuscode: 500,
       };

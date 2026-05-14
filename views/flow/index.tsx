@@ -8,7 +8,10 @@ import {
   Clock,
   Mail,
   MapPin,
+  MessageSquare,
   Shield,
+  Star,
+  Trash2,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -17,6 +20,7 @@ import { FC, useEffect, useState } from "react";
 import { AttendeeClientService } from "@/api/services/tendiflow/attendees/client.service";
 import {
   AttendanceStatus,
+  Attendee,
   AttendeeCheckinDevice,
   AttendeeCheckinLocation,
 } from "@/api/services/tendiflow/attendees/types";
@@ -57,6 +61,9 @@ type FlowStep =
   | "success"
   | "error"
   | "already_checked_in"
+  | "feedback_form"
+  | "feedback_submitted"
+  | "cancelled"
   | "timing_error"
   | "location_error";
 
@@ -79,6 +86,20 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
   const [otpError, setOtpError] = useState<string | null>(null);
   const [otpExpiresAt, setOtpExpiresAt] = useState<string | null>(null);
   const [otpEmailSentTo, setOtpEmailSentTo] = useState<string | null>(null);
+  // sessionAttendee is the hydrated attendee record (from either the
+  // session-probe at mount, or the freshly-issued one from verify-otp).
+  // We hold onto it so feedback/cancel actions know which record they
+  // operate against and can pre-fill the feedback form.
+  const [sessionAttendee, setSessionAttendee] = useState<Attendee | null>(
+    null,
+  );
+  const [feedbackRating, setFeedbackRating] = useState<number>(0);
+  const [feedbackComment, setFeedbackComment] = useState<string>("");
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [cancelConfirming, setCancelConfirming] = useState(false);
+  const [cancelSubmitting, setCancelSubmitting] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const {
     meeting,
@@ -99,7 +120,14 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     useGuestAttendeeCreateUpdate({
       attendeeForm,
       organisationId,
-      onSuccess: () => setCurrentStep("success"),
+      onSuccess: (attendee) => {
+        // Capture the freshly-issued attendee so the Success screen
+        // (and a later return to Already Checked In) can drive feedback
+        // / cancel actions against the right record without another
+        // round trip.
+        setSessionAttendee(attendee);
+        setCurrentStep("success");
+      },
       // onError fires for *unexpected* errors only — handleVerifyOtp
       // returns 400/410/429 inline (handled in the OTP screen), and 409
       // (already checked in) we route ourselves below.
@@ -143,6 +171,13 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
           sessionAttendee.checkin &&
           sessionAttendee.attendance_status !== AttendanceStatus.CANCELLED
         ) {
+          setSessionAttendee(sessionAttendee);
+          if (sessionAttendee.feedback?.rating) {
+            setFeedbackRating(sessionAttendee.feedback.rating);
+          }
+          if (sessionAttendee.feedback?.comment) {
+            setFeedbackComment(sessionAttendee.feedback.comment);
+          }
           setCurrentStep("already_checked_in");
           return;
         }
@@ -454,6 +489,87 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
     setCurrentStep("error");
   };
 
+  const handleStartFeedback = (): void => {
+    // Pre-fill from prior submission if there is one; submit overwrites
+    // server-side (backend's submit_feedback doesn't reject duplicates).
+    setFeedbackRating(sessionAttendee?.feedback?.rating ?? 0);
+    setFeedbackComment(sessionAttendee?.feedback?.comment ?? "");
+    setFeedbackError(null);
+    setCurrentStep("feedback_form");
+  };
+
+  const handleSubmitFeedback = async (): Promise<void> => {
+    if (!feedbackRating || feedbackRating < 1 || feedbackRating > 5) {
+      setFeedbackError("Please pick a rating from 1 to 5 stars.");
+      return;
+    }
+    setFeedbackSubmitting(true);
+    setFeedbackError(null);
+    try {
+      const response = await clientService.submitGuestCheckinFeedback(
+        organisationId,
+        meetingId,
+        {
+          feedback: {
+            rating: feedbackRating,
+            comment: feedbackComment.trim() || null,
+            feedback_datetime: new Date().toISOString(),
+          },
+        },
+      );
+      if (response.success && response.data) {
+        setSessionAttendee(response.data);
+        setCurrentStep("feedback_submitted");
+        return;
+      }
+      if (response.statuscode === 401) {
+        setFeedbackError(
+          "Your check-in session expired. Please refresh the page to verify again.",
+        );
+        return;
+      }
+      if (response.statuscode === 410) {
+        setFeedbackError(
+          "The feedback window for this meeting has closed.",
+        );
+        return;
+      }
+      setFeedbackError(
+        response.message || "Couldn't submit feedback. Please try again.",
+      );
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
+
+  const handleConfirmCancel = async (): Promise<void> => {
+    setCancelSubmitting(true);
+    setCancelError(null);
+    try {
+      const response = await clientService.cancelGuestCheckin(
+        organisationId,
+        meetingId,
+      );
+      if (response.success) {
+        setSessionAttendee(null);
+        setCancelConfirming(false);
+        setCurrentStep("cancelled");
+        return;
+      }
+      if (response.statuscode === 401) {
+        setCancelError(
+          "Your check-in session expired. Please refresh the page to verify again.",
+        );
+        return;
+      }
+      setCancelError(
+        response.message || "Couldn't cancel your check-in. Please try again.",
+      );
+    } finally {
+      setCancelSubmitting(false);
+    }
+  };
+
   const handleResendOtp = async (): Promise<void> => {
     const submitValues = buildSubmitValues();
     if (!submitValues) return;
@@ -585,6 +701,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
 
   // Already checked in state
   if (currentStep === "already_checked_in") {
+    const existingFeedback = sessionAttendee?.feedback;
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <div className="flex-grow flex items-center justify-center p-4">
@@ -595,34 +712,280 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
                 Already Checked In
               </h3>
               <p className="mt-1 text-sm/6 text-gray-500">
-                You have already checked in to this meeting.
+                You&apos;re checked in to this meeting from this browser.
               </p>
             </div>
 
-            <div className="px-4 py-5 sm:p-6">
-              <h2 className="text-xl/7 font-semibold text-gray-900">
-                {meeting.title}
-              </h2>
-              <div className="mt-2 text-sm/6 text-gray-500 space-y-2">
-                <div className="flex items-center">
-                  <Calendar className="size-4 mr-2" />
-                  {getFormattedDateAndTime({
-                    utc: meeting.start_datetime,
-                  })}{" "}
-                  - {getFormattedDateAndTime({ utc: meeting.end_datetime })}
-                </div>
-                <div className="flex items-center">
-                  <Building2 className="size-4 mr-2" />
-                  {meeting.address}
+            <div className="px-4 py-5 sm:p-6 space-y-5">
+              <div>
+                <h2 className="text-xl/7 font-semibold text-gray-900">
+                  {meeting.title}
+                </h2>
+                <div className="mt-2 text-sm/6 text-gray-500 space-y-2">
+                  <div className="flex items-center">
+                    <Calendar className="size-4 mr-2" />
+                    {getFormattedDateAndTime({
+                      utc: meeting.start_datetime,
+                    })}{" "}
+                    - {getFormattedDateAndTime({ utc: meeting.end_datetime })}
+                  </div>
+                  {meeting.address && (
+                    <div className="flex items-center">
+                      <Building2 className="size-4 mr-2" />
+                      {meeting.address}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="mt-4 text-xs text-gray-500">
-                <p>
-                  If you need to update your information, please contact the
-                  meeting organizer.
-                </p>
+              {existingFeedback?.rating && (
+                <div className="rounded-md bg-gray-50 border border-gray-200 p-3">
+                  <p className="text-xs font-medium text-gray-700 mb-1">
+                    Your feedback
+                  </p>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Star
+                        key={n}
+                        className={`size-4 ${
+                          n <= (existingFeedback.rating ?? 0)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {existingFeedback.comment && (
+                    <p className="mt-2 text-sm text-gray-600 italic">
+                      &ldquo;{existingFeedback.comment}&rdquo;
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={handleStartFeedback}
+                  className="w-full flex justify-center items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  <MessageSquare className="mr-1.5 size-4" />
+                  {existingFeedback?.rating
+                    ? "Update feedback"
+                    : "Leave feedback"}
+                </button>
+
+                {cancelConfirming ? (
+                  <div className="rounded-md border border-red-200 bg-red-50 p-3 space-y-3">
+                    <p className="text-sm text-red-800">
+                      Cancel your check-in? You&apos;ll need to verify your
+                      email again to re-check in.
+                    </p>
+                    {cancelError && (
+                      <p className="text-xs text-red-700" role="alert">
+                        {cancelError}
+                      </p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleConfirmCancel}
+                        disabled={cancelSubmitting}
+                        className="flex-1 inline-flex justify-center items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 disabled:bg-gray-400"
+                      >
+                        {cancelSubmitting ? "Cancelling..." : "Yes, cancel"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCancelConfirming(false);
+                          setCancelError(null);
+                        }}
+                        disabled={cancelSubmitting}
+                        className="flex-1 inline-flex justify-center items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50"
+                      >
+                        Keep me in
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setCancelConfirming(true)}
+                    className="w-full inline-flex justify-center items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-red-700 border border-red-200 hover:bg-red-50"
+                  >
+                    <Trash2 className="mr-1.5 size-4" />
+                    Cancel my check-in
+                  </button>
+                )}
               </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Feedback form
+  if (currentStep === "feedback_form") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="flex-grow flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-sm max-w-md w-full overflow-hidden">
+            <div className="px-4 py-5 sm:p-6 text-center">
+              <MessageSquare className="mx-auto size-12 text-blue-500" />
+              <h3 className="mt-2 text-base/7 font-medium text-gray-900">
+                Share your feedback
+              </h3>
+              <p className="mt-1 text-sm/6 text-gray-500">
+                How did the meeting go? Your input goes to the organiser.
+              </p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void handleSubmitFeedback();
+              }}
+              className="px-4 py-5 sm:p-6 border-t border-gray-200 space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rating
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => {
+                        setFeedbackRating(n);
+                        if (feedbackError) setFeedbackError(null);
+                      }}
+                      aria-label={`${n} star${n === 1 ? "" : "s"}`}
+                      className="p-1 focus:outline-none focus:ring-2 focus:ring-ring rounded"
+                    >
+                      <Star
+                        className={`size-8 ${
+                          n <= feedbackRating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="feedback-comment"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Comment (optional)
+                </label>
+                <textarea
+                  id="feedback-comment"
+                  rows={4}
+                  value={feedbackComment}
+                  onChange={(e) => setFeedbackComment(e.target.value)}
+                  placeholder="What stood out? Anything we could improve?"
+                  className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+
+              {feedbackError && (
+                <p className="text-sm text-red-600" role="alert">
+                  {feedbackError}
+                </p>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="submit"
+                  disabled={feedbackSubmitting || feedbackRating < 1}
+                  className="flex-1 inline-flex justify-center items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 disabled:bg-gray-400"
+                >
+                  {feedbackSubmitting ? "Submitting..." : "Submit feedback"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFeedbackError(null);
+                    setCurrentStep(
+                      sessionAttendee ? "already_checked_in" : "success",
+                    );
+                  }}
+                  disabled={feedbackSubmitting}
+                  className="inline-flex justify-center items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Feedback submitted confirmation
+  if (currentStep === "feedback_submitted") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="flex-grow flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-sm max-w-md w-full overflow-hidden">
+            <div className="bg-green-50 px-4 py-5 sm:p-6 text-center">
+              <CheckCircle className="mx-auto size-12 text-green-500" />
+              <h3 className="mt-2 text-base/7 font-medium text-gray-900">
+                Thanks for the feedback
+              </h3>
+              <p className="mt-1 text-sm/6 text-gray-500">
+                We&apos;ve passed it along to the organiser.
+              </p>
+            </div>
+            <div className="px-4 py-5 sm:p-6">
+              <button
+                type="button"
+                onClick={() => setCurrentStep("already_checked_in")}
+                className="w-full inline-flex justify-center items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50"
+              >
+                Back to check-in
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Cancellation confirmation
+  if (currentStep === "cancelled") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="flex-grow flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-sm max-w-md w-full overflow-hidden">
+            <div className="bg-red-50 px-4 py-5 sm:p-6 text-center">
+              <XCircle className="mx-auto size-12 text-red-500" />
+              <h3 className="mt-2 text-base/7 font-medium text-gray-900">
+                Check-in cancelled
+              </h3>
+              <p className="mt-1 text-sm/6 text-gray-500">
+                Your check-in for this meeting has been cancelled. If you
+                change your mind, you can re-check in.
+              </p>
+            </div>
+            <div className="px-4 py-5 sm:p-6">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="w-full inline-flex justify-center items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90"
+              >
+                Re-check in
+              </button>
             </div>
           </div>
         </div>
@@ -959,7 +1322,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
                   autoFocus
                   aria-invalid={!!otpError}
                   aria-describedby={otpError ? "otp-error" : undefined}
-                  className="block w-full rounded-md border border-gray-300 px-3 py-3 text-center text-2xl font-mono tracking-[0.5em] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="block w-full rounded-md border border-gray-300 px-3 py-3 text-center text-2xl font-mono tracking-[0.5em] focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring"
                   placeholder="000000"
                 />
                 {otpError && (
@@ -987,7 +1350,7 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
                   type="button"
                   onClick={() => void handleResendOtp()}
                   disabled={isSubmitting}
-                  className="text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                  className="text-primary hover:text-primary/80 disabled:text-gray-400 underline-offset-2 hover:underline"
                 >
                   Send a new code
                 </button>
@@ -1057,11 +1420,19 @@ export const MeetingCheckInFlowView: FC<MeetingCheckInFlowViewProps> = ({
                 </div>
               </div>
 
-              <div className="mt-6 border-t border-gray-200 pt-4">
+              <div className="mt-6 border-t border-gray-200 pt-4 space-y-3">
                 <p className="text-sm/6 text-gray-500">
                   Thank you for confirming your attendance. Have a great
                   meeting!
                 </p>
+                <button
+                  type="button"
+                  onClick={handleStartFeedback}
+                  className="w-full inline-flex justify-center items-center rounded-md bg-background px-3 py-2 text-sm font-medium text-primary border border-input hover:bg-accent hover:text-accent-foreground"
+                >
+                  <MessageSquare className="mr-1.5 size-4" />
+                  Leave feedback
+                </button>
               </div>
             </div>
           </div>
