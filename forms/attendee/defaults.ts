@@ -26,7 +26,7 @@ export const attendeeFormDefaultValues = ({
     email: attendee?.email || "",
     first_name: attendee?.first_name || "",
     last_name: attendee?.last_name || "",
-    phone_number: attendee?.phone_number || null,
+    phone_number: attendee?.phone_number || "",
     organisation_name: attendee?.organisation_name || null,
     division: attendee?.division || null,
     occupation: attendee?.occupation || null,
@@ -37,5 +37,6 @@ export const attendeeFormDefaultValues = ({
     custom_field_responses: attendee?.custom_field_responses || null,
     checkin: attendee?.checkin || null,
     feedback: attendee?.feedback || null,
+    channel: "email" as const,
   };
 };

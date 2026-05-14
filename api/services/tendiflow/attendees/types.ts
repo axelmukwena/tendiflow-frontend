@@ -238,10 +238,18 @@ export interface RegisterAttendeeProps {
   data: AttendeeBaseCreate;
 }
 
+export type OtpChannel = "email" | "sms";
+
+export interface AttendeeGuestCheckinOtpRequestBody {
+  channel: OtpChannel;
+  attendee: AttendeeCreateGuest;
+}
+
 export interface AttendeeGuestCheckinOtpRequestResponse {
   status: string;
   expires_at: string;
   expires_in_minutes: number;
+  channel: OtpChannel;
 }
 
 export interface AttendeeGuestCheckinOtpVerifyBody {
@@ -251,7 +259,7 @@ export interface AttendeeGuestCheckinOtpVerifyBody {
 
 export interface RequestGuestCheckinOtpProps {
   organisation_id: string;
-  data: AttendeeCreateGuest;
+  data: AttendeeGuestCheckinOtpRequestBody;
 }
 
 export interface VerifyGuestCheckinOtpProps {
