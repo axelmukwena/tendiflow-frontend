@@ -94,6 +94,30 @@ export const getFormattedDateAndTime = ({
 };
 
 /**
+ * Format date and time to locale in "1 September 2021 at 12:00" format,
+ * rendered in the supplied IANA timezone (e.g. "Africa/Windhoek"). Mirrors
+ * `getFormattedDateAndTime` but respects the timezone of the underlying
+ * event rather than the runtime's local zone — important for server-rendered
+ * metadata (Vercel Edge / serverless runtime defaults to UTC).
+ *
+ * @param {GetFormattedDateProps & { timezone: string }} props - the props object
+ * @returns {string} - the formatted date and time in the given timezone, "" on invalid input
+ */
+export const getFormattedDateAndTimeInTimezone = ({
+  utc,
+  timezone,
+  monthFormat = "long",
+}: GetFormattedDateProps & { timezone: string }): string => {
+  if (!utc) return "";
+  const date = stringToDate(utc);
+  if (!date) return "";
+  const zoned = date.setZone(timezone || "utc");
+  if (!zoned.isValid) return "";
+  const monthToken = monthFormat === "short" ? "MMM" : "MMMM";
+  return zoned.setLocale("en-GB").toFormat(`d ${monthToken} yyyy 'at' HH:mm`);
+};
+
+/**
  * Get time ago from date
  * @param inputDate - date to format
  * @returns {string} - the formatted time ago

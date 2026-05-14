@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { FC } from "react";
 
 import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
-import { getFormattedDateAndTime } from "@/utilities/helpers/date";
+import { getFormattedDateAndTimeInTimezone } from "@/utilities/helpers/date";
 import { MeetingCheckInFlowView } from "@/views/flow";
 
 import { fetchMeetingForMeta } from "./_meta";
@@ -30,7 +30,10 @@ export async function generateMetadata({
   }
 
   const title = `${meeting.title} — ${meeting.organisation_name}`;
-  const dateText = getFormattedDateAndTime({ utc: meeting.start_datetime });
+  const dateText = getFormattedDateAndTimeInTimezone({
+    utc: meeting.start_datetime,
+    timezone: meeting.timezone,
+  });
   const description = [dateText, meeting.address]
     .filter(Boolean)
     .join(" · ");

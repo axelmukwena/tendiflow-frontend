@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
 import { ENVIRONMENT_VARIABLES } from "@/utilities/constants/environment";
+import { getFormattedDateAndTimeInTimezone } from "@/utilities/helpers/date";
 
 import { fetchMeetingForMeta, MeetingForMeta } from "./_meta";
 
@@ -22,37 +23,6 @@ async function loadFont(filename: string): Promise<ArrayBuffer> {
     throw new Error(`Font fetch failed (${filename}): ${res.status}`);
   }
   return res.arrayBuffer();
-}
-
-/**
- * Format the meeting's start datetime in its own timezone — the Edge
- * runtime would otherwise format in UTC, which misrepresents the local
- * meeting time for any non-UTC timezone. Mirrors the date shape used
- * by page.tsx's description text for consistency between the og:image
- * and og:description fields.
- */
-function formatMeetingStart(startISO: string, timezone: string): string {
-  try {
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: timezone,
-    }).format(new Date(startISO));
-  } catch {
-    // Invalid timezone string — fall back to UTC rather than throwing.
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(new Date(startISO));
-  }
 }
 
 interface ImageProps {
@@ -90,7 +60,10 @@ export default async function Image({ params }: ImageProps): Promise<Response> {
   const title = meeting?.title ?? "Meeting check-in";
   const org = meeting?.organisation_name ?? "Tendiflow";
   const date = meeting
-    ? formatMeetingStart(meeting.start_datetime, meeting.timezone)
+    ? getFormattedDateAndTimeInTimezone({
+        utc: meeting.start_datetime,
+        timezone: meeting.timezone,
+      })
     : "";
   const address = meeting?.address ?? "";
 
