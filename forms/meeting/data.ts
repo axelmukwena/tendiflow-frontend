@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 import {
   MeetingCreate,
   MeetingLocationCoordinates,
@@ -14,6 +16,21 @@ export interface LoadMeetingCreateData {
 export interface LoadMeetingUpdateData {
   values: MeetingFormSchema;
 }
+
+const DATETIME_LOCAL_FORMAT = "yyyy-MM-dd'T'HH:mm";
+
+// `<input type="datetime-local">` produces a naive string ("2026-05-15T09:15")
+// representing wall-clock time in the form's selected timezone. Send a real
+// UTC ISO to the backend so storage and comparisons are unambiguous.
+const toUtcIso = (localValue: string, zone: string): string => {
+  const dt = DateTime.fromFormat(localValue, DATETIME_LOCAL_FORMAT, { zone });
+  if (!dt.isValid) {
+    throw new Error(
+      `Invalid datetime: "${localValue}" in zone "${zone}" (${dt.invalidReason})`,
+    );
+  }
+  return dt.toUTC().toISO() as string;
+};
 
 /**
  * Get the data to create a meeting
@@ -35,8 +52,8 @@ export const getMeetingCreateData = ({
   const data: MeetingCreate = {
     title: values.title,
     description: values.description,
-    start_datetime: values.start_datetime,
-    end_datetime: values.end_datetime,
+    start_datetime: toUtcIso(values.start_datetime, values.timezone),
+    end_datetime: toUtcIso(values.end_datetime, values.timezone),
     timezone: values.timezone,
     address: values.address,
     coordinates: coordinates,
@@ -84,8 +101,8 @@ export const getMeetingUpdateData = ({
   const data: MeetingUpdate = {
     title: values.title,
     description: values.description,
-    start_datetime: values.start_datetime,
-    end_datetime: values.end_datetime,
+    start_datetime: toUtcIso(values.start_datetime, values.timezone),
+    end_datetime: toUtcIso(values.end_datetime, values.timezone),
     timezone: values.timezone,
     address: values.address,
     coordinates: coordinates,

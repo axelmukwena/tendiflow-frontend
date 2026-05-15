@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { DefaultValues } from "react-hook-form";
 
 import {
@@ -11,6 +12,27 @@ export interface MeetingFormDefaultValuesProps {
   meeting?: Meeting | null;
 }
 
+const DATETIME_LOCAL_FORMAT = "yyyy-MM-dd'T'HH:mm";
+
+// `<input type="datetime-local">` wants wall-clock components — no zone
+// suffix. Two cases:
+//   - New meeting: format `now` in the browser's local zone so the user
+//     sees their current wall-clock time as the suggested default.
+//   - Existing meeting: backend stores `start_datetime` as a UTC instant,
+//     so format that instant *in the meeting's timezone* — otherwise an
+//     08:00 Windhoek meeting would show as 06:00 in the input.
+const formatDateTimeLocalNow = (date: Date): string => {
+  const pad = (n: number): string => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate(),
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+const formatStoredUtcInZone = (utcIso: string, zone: string): string => {
+  const dt = DateTime.fromISO(utcIso, { zone: "utc" }).setZone(zone);
+  return dt.isValid ? dt.toFormat(DATETIME_LOCAL_FORMAT) : utcIso;
+};
+
 /**
  * Get default values for meeting form
  * @returns {DefaultValues<MeetingFormSchema>} - default values for meeting form
@@ -20,17 +42,19 @@ export const meetingFormDefaultValues = ({
 }: MeetingFormDefaultValuesProps): DefaultValues<MeetingFormSchema> => {
   const now = new Date();
   const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-  const formatDateTimeLocal = (date: Date): string => {
-    return date.toISOString().slice(0, 16);
-  };
+  const browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const zone = meeting?.timezone || browserZone;
 
   return {
     title: meeting?.title || "",
     description: meeting?.description || "",
-    start_datetime: meeting?.start_datetime || formatDateTimeLocal(now),
-    end_datetime: meeting?.end_datetime || formatDateTimeLocal(oneHourLater),
-    timezone:
-      meeting?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    start_datetime: meeting?.start_datetime
+      ? formatStoredUtcInZone(meeting.start_datetime, zone)
+      : formatDateTimeLocalNow(now),
+    end_datetime: meeting?.end_datetime
+      ? formatStoredUtcInZone(meeting.end_datetime, zone)
+      : formatDateTimeLocalNow(oneHourLater),
+    timezone: zone,
     address: meeting?.address || "",
     coordinates: meeting?.coordinates || null,
     expected_attendees: meeting?.expected_attendees || null,
